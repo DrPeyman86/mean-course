@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-root',//this is the custom html selector that will render based on what angular tells it
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

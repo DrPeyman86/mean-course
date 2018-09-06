@@ -1,0 +1,20 @@
+<!--the [] wrapped around a property of an html object tells angular to target the underlying objects of the html element-->
+<!-- you can add a string inside the quotations mark by single quotes. or if you add something inside double quotes
+it will look for a property inside the component to get its value, in this case newPost-->
+<!--you can add references to any html element by hashtag on the element-->
+<!-- <textarea rows="6" [value]="newPost" #postInput></textarea> -->
+
+<!--angular has feature called two-way binding which eliminates the need to setting the value and reading a value.
+the two way binding allows a two directional flow -->
+<!--the ngModel is a directive that angular will listen and emit data, so two directional flow-->
+<!-- you need to bind the directive to a property inside the component-->
+<textarea rows="6" [(ngModel)]="enteredValue"></textarea>
+
+<hr>
+<!--hashtag referenced elements can now be added to the event listener function being called-->
+<!--using directives on your form elements, you no longer need to send them as argument to the function being called
+because the directive is automatically listening to the function called-->
+<button (click)="onAddPost()">Save Post</button><!--event binding to listen to an event, just do () and remove the "on" in front of onclick or onKeyup or onmouse, etc. and then equal to the function you want to
+//call when that button is clicked in this case-->
+<p>{{ newPost }}</p><!--the double curly braces are string interpollation. you can add output hooks directly on the template-->
+<!--insde the string interpollation, you refer to an object stored in the component-->
