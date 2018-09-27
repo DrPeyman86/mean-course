@@ -1,20 +1,80 @@
-<!--the [] wrapped around a property of an html object tells angular to target the underlying objects of the html element-->
-<!-- you can add a string inside the quotations mark by single quotes. or if you add something inside double quotes
-it will look for a property inside the component to get its value, in this case newPost-->
-<!--you can add references to any html element by hashtag on the element-->
-<!-- <textarea rows="6" [value]="newPost" #postInput></textarea> -->
+<mat-card>
+  <!--#postForm name can be whatever but it sets to a angular directive that has to be "ngForm" this will store the ngForm which is an
+  angular form object into #postForm. so now #postForm as an object can be referenced to the (submit) event-->
+  <form (submit)="onAddPost(postForm)" #postForm="ngForm">
 
-<!--angular has feature called two-way binding which eliminates the need to setting the value and reading a value.
-the two way binding allows a two directional flow -->
-<!--the ngModel is a directive that angular will listen and emit data, so two directional flow-->
-<!-- you need to bind the directive to a property inside the component-->
-<textarea rows="6" [(ngModel)]="enteredValue"></textarea>
+      <mat-form-field>
+          <!-- <input
+          matInput type="text"
+          [(ngModel)]="enteredTitle"
+          > -->
+          <!--new version -->
+          <!--the two way binding can be replaced by following because this input is in a form tag now, and if you have the
+          FormsModule library imported inside the app.module.ts, angular will automatically store values and read values of the input
+          so, replace above code with this -->
+          <!--name is needed to reference this input in angular-->
+          <!--ngModel tells angular this is a directive input which angular automatically sets and read values just as above-->
+          <!--this also makes validation easier-->
+          <input
+          matInput type="text"
+          name="title"
+          ngModel
+          required
+          minlength="3"
+          #title="ngModel"><!--list ngForm, ngModel will give you access to this input and store it as a local object in #title-->
+          <mat-error *ngIf="title.invalid">Please enter a post title</mat-error>
+        </mat-form-field>
+        <mat-form-field>
+          <!--the [] wrapped around a property of an html object tells angular to target the underlying objects of the html element-->
+          <!-- you can add a string inside the quotations mark by single quotes. or if you add something inside double quotes
+          it will look for a property inside the component to get its value, in this case newPost-->
+          <!--you can add references to any html element by hashtag on the element-->
+          <!-- <textarea rows="6" [value]="newPost" #postInput></textarea> -->
+
+          <!--angular has feature called two-way binding which eliminates the need to setting the value and reading a value.
+          the two way binding allows a two directional flow -->
+          <!--the ngModel is a directive that angular will listen and emit data, so two directional flow-->
+          <!-- you need to bind the directive to a property inside the component-->
+          <!-- <textarea matInput rows="6"
+          [(ngModel)]="enteredContent">
+          </textarea> -->
+          <!--new Version-->
+          <!--this also makes validation easier-->
+          <textarea matInput rows="4"
+            name="content"
+            ngModel
+            required
+            minLength="3"
+            #content="ngModel"><!--list ngForm, ngModel will give you access to this input and store it as a local object in #title-->
+          </textarea>
+          <mat-error *ngIf="content.invalid">Please enter a post content</mat-error><!--content is the #content referenced above-->
+        </mat-form-field>
+        <!--hashtag referenced elements can now be added to the event listener function being called-->
+        <!--using directives on your form elements, you no longer need to send them as argument to the function being called
+        because the directive is automatically listening to the function called-->
+        <!--
+        <button
+          mat-raised-button
+          color="accent"
+          (click)="onAddPost()">Save Post</button>--><!--event binding to listen to an event, just do () and remove the "on" in front of onclick or onKeyup or onmouse, etc. and then equal to the function you want to
+          //call when that button is clicked in this case-->
+        <!--new Version after adding Form tag-->
+        <!--type submit button will submit the form. so add the validation method in the form tag above-->
+        <button
+          mat-raised-button
+          color="accent"
+          type="submit">Save Post</button><!--event binding to listen to an event, just do () and remove the "on" in front of onclick or onKeyup or onmouse, etc. and then equal to the function you want to
+          //call when that button is clicked in this case-->
+
+  </form>
+
+</mat-card>
 
 <hr>
 <!--hashtag referenced elements can now be added to the event listener function being called-->
 <!--using directives on your form elements, you no longer need to send them as argument to the function being called
 because the directive is automatically listening to the function called-->
-<button (click)="onAddPost()">Save Post</button><!--event binding to listen to an event, just do () and remove the "on" in front of onclick or onKeyup or onmouse, etc. and then equal to the function you want to
+<!--<button (click)="onAddPost()">Save Post</button>event binding to listen to an event, just do () and remove the "on" in front of onclick or onKeyup or onmouse, etc. and then equal to the function you want to
 //call when that button is clicked in this case-->
 <p>{{ newPost }}</p><!--the double curly braces are string interpollation. you can add output hooks directly on the template-->
 <!--insde the string interpollation, you refer to an object stored in the component-->

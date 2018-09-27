@@ -1,3 +1,10 @@
-<h1>First app page</h1>
-<!-- by default angular does not know this element name, so you have to define/register it in the main app.module.ts-->
-<app-post-create></app-post-create>
+<!-- <h1>First app page</h1> -->
+<app-header></app-header><!--app-header component selector comes from header.component.ts-->
+<main>
+  <!-- by default angular does not know this element name, so you have to define/register it in the main app.module.ts-->
+  <!--app-post-create selector is from the post-create.component.ts. here the tag (postCreated) is listening to the same name
+  defined in the post-create.component.ts file. So when the event is triggered, it will run a local method in this component
+called onPostAdded with the special $event variable that gives you access to the data passed down through postCreated-->
+  <app-post-create (postCreated)="onPostAdded($event)"></app-post-create>
+  <app-post-list [posts]="storedPosts"></app-post-list><!--comes from post-list.component.html-->
+</main>
