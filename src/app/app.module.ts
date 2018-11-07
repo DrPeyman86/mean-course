@@ -19,6 +19,7 @@ import { AppComponent } from './app.component';
 import { PostCreateComponent } from './posts/post-create/post-create.component';
 import { HeaderComponent } from './header/header.component';
 import { PostListComponent } from './posts/post-list/post-list.component';
+import { PostsService } from './posts/post.service';//you can add this service to the providers[] array in bottom. One of the methods of adding service to the angular app
 //import the component you want to register first
 //after the module is started, angular will reguster these certain components
 //which are declared. It also imports BrowserModule which is a module for browser framework.
@@ -26,6 +27,7 @@ import { PostListComponent } from './posts/post-list/post-list.component';
 //selects of the AppComponent in this case
 
 //all components added other than the index.html will need to be added to the app.component
+//Providers are where you define services. like post.service.ts
 @NgModule({
   declarations: [
     AppComponent,

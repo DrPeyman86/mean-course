@@ -3,8 +3,21 @@
 <main>
   <!-- by default angular does not know this element name, so you have to define/register it in the main app.module.ts-->
   <!--app-post-create selector is from the post-create.component.ts. here the tag (postCreated) is listening to the same name
-  defined in the post-create.component.ts file. So when the event is triggered, it will run a local method in this component
+  defined in the post-create.component.ts file. Using Event binding, So when the event is triggered, it will run a local method in this component
 called onPostAdded with the special $event variable that gives you access to the data passed down through postCreated-->
-  <app-post-create (postCreated)="onPostAdded($event)"></app-post-create>
-  <app-post-list [posts]="storedPosts"></app-post-list><!--comes from post-list.component.html-->
+  
+  <!-- <app-post-create (postCreated)="onPostAdded($event)"></app-post-create>
+  <app-post-list [posts]="storedPosts"></app-post-list>-->
+  <!--once storedPosts is set inside of app.component.ts, send posts property
+    to post-list.component.ts so that, that component can lists posts-->
+
+    <!--V2-->
+    <!--once you move to services where you can inject objects through components using the @Injectible decorator in the services file, you
+      will not be listening to custom events from a component and sending its data to it, and then setting it as a property in this component.-->
+    <!--you will remove all event listening andd property bindings since all that's is done for you in the services and components will be looking 
+      for these changes with the services methods avaialble-->
+    <!--commment out the custom tags above with event and property binding-->
+    <app-post-create></app-post-create>
+    <app-post-list></app-post-list>
+
 </main>
