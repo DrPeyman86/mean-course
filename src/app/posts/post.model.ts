@@ -2,6 +2,7 @@
 //needs to be, need to have which properties
 //this defines what a post needs to be like in the application
 export interface Post {
+  id: string;
   title: string;
   content: string;
 }

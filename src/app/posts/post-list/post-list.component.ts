@@ -17,10 +17,10 @@ export class PostListComponent implements OnInit, OnDestroy {
   //   {title: 'Second Post', content: 'This is the Second post\'s conent"'},
   //   {title: 'Third Post', content: 'This is the Third post\'s conent"'}
   // ];
-  //@Input() 
+  //@Input()
   posts: Post[] = [];//make the post property bindable from outside by property binding. do this with @Input dectorator
   //once you use the PostsService service, since you will use methods from that class to either get/set your objects, you do not need
-  //the @Input decorator above. 
+  //the @Input decorator above.
 
   private postsSub: Subscription;//postsSub is of type of Subscription
 
@@ -43,7 +43,14 @@ constructor(postsService: PostsService) {
 //so every time a post is created and is sent into post-list, this method will run
 ngOnInit() {
   //set the posts property in this component by calling .getPosts() method of the postsservice service which gets the posts
-  this.posts = this.postsService.getPosts();
+
+  // this.posts = this.postsService.getPosts();
+
+  //V2 -- after adding httpClient to post.service.ts, you do not need to set this.posts to the return results of this.postsService.getPosts since it's not returning anyhing.
+  //just trigger the method to call the http request now
+  //and since we have the .subscribe subscription, you will be able to render the posts once they are there
+  this.postsService.getPosts();
+
   //add a listener to that Subject
   //once you add Subscription, add the service to that Subscription so that it can be unsubcribed when ngOnDestory runs
   this.postsSub = this.postsService.getPostsUpdateListener()

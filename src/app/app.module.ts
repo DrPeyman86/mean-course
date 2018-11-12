@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms'//this is the library needed to import to be able to use directives. not loaded by default
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';//this module is needed to send/recieve http requests from a backend code
 import {
   MatInputModule,
   MatCardModule,
@@ -43,7 +44,8 @@ import { PostsService } from './posts/post.service';//you can add this service t
     MatCardModule,
     MatButtonModule,
     MatToolbarModule,
-    MatExpansionModule
+    MatExpansionModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
