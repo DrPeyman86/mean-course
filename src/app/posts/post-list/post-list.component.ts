@@ -59,6 +59,14 @@ ngOnInit() {
       this.posts = posts;
     });//.subscribe sets up a subscription which takes 3 arguments, a function() argument, an error callback, and a complete successfully callback
 }
+
+
+onDelete(postId: string) {
+  //console.log('posts 0:',postId)
+  this.postsService.deletePost(postId);
+}
+
+
 //life cycle hook will get called when this component is no longer part of the dom, where memory cleanup will take place
 ngOnDestroy() {
   //by default .subcribe() will create a subscription and store in memory. if the page is gone from DOM the subscription will still exist

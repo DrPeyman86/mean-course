@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';//needed when adding the @Injectable(
 //one option is to not rename that array in getPosts() method.
 //another option is to use observables by using the rxjs package that comes with angular.
 import { Subject } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';//import the httpclient to components or services in this case that you want the backend to communicate with
 import { stringify } from '@angular/core/src/render3/util';
@@ -30,6 +31,7 @@ import { stringify } from '@angular/core/src/render3/util';
   //components. You could also go into app.module.ts, import the service you created, and add the service object in the "providers" array. Both
   //will give you the same results. The @Injectable option is less work
 })
+
 export class PostsService {
   //reference type is
   //you do
@@ -56,10 +58,23 @@ export class PostsService {
     //because why would you want to make a request to something if you are not interested in what it sends back.
     //in a http subscription, you do not have to .unsubscribe() something on ngOnDestroy() for example. When other requests are made, angular will automatically unsubscribe to what was received previously and so on.
     //.get() is a generic type function. meaning you can specify what type of data you expect to get back
-    this.http.get<{message: string, posts: Post[]}>('http://localhost:3000/api/posts')
-      .subscribe((postData)=>{
+    this.http
+      .get<{message: string, posts: any}>(//post type is no longer Post[] because posts coming from backend is with an "underscore" in front of id...so change to any for now.
+        'http://localhost:3000/api/posts'
+        )
+       //map method expects an object/argument that is the object that comes back from the observables stream. so in .get() request, it expects that returned result
+      .pipe(map((postData)=>{
+        return postData.posts.map(post=> {
+          return {
+            title: post.title,
+            content: post.content,
+            id: post._id
+          };
+        });
+      }))//place a pipe to manipulate the data before the .subscribe chain so that you may want to rename some fields to match with what's in front-end. like "_id" to "id". pipe() is an obserable method that accepts certain operators
+      .subscribe((transformedPost)=>{
         //postData is the response of that request. could call it whatever you want. the first argument in .subscribe is the response
-        this.posts = postData.posts;//set this.posts to whatever is coming in from the backend code
+        this.posts = transformedPost;//set this.posts to whatever is coming in from the backend code
         this.postsUpdated.next([...this.posts]);
       });
 
@@ -71,26 +86,48 @@ export class PostsService {
 
   //method to call by components to add a post to the posts array
   addPost(title: string, content: string) {
-    const post: Post = {id: null, title: title, content: content};
-    //emit an event to the backend here. post receives back a generic type object, which we know it will just be a message that is 
-    //of string type. 
+    const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
+    //deletion process would fail.
+    //option 1: to call getPost() after the .subscribe(), inside of it. so that it will fetch the newly posts so that the "id" field will also get its value. Not best option
+    //option 2: better option - get back the id that was newly created. Do this in app.js in backend code
+    //emit an event to the backend here. post receives back a generic type object, which we know it will just be a message that is
+    //of string type.
     //for the .post() method, you pass a second argument of what you want to post to that path URL
-    this.http.post<{message: string}>('http://localhost:3000/api/posts', post)
+    this.http.post<{message: string, postId: string}>('http://localhost:3000/api/posts', post)
       .subscribe((responseData)=>{
-        console.log(responseData.message);
+        //console.log(responseData.message);
         //if you have these lines inside the .subscribe() it will only add the newly post if and only if the post was added to the server
         //successfully. Because the .subscribe() will only run if the backend code returns no errors.
+        const postId = responseData.postId;
+        post.id = postId;//update the post object defined above where the id was initially null...to update its "id" property to the "id" returned from backend so that the front-end will know of its value the first time without needing to reload page.
         this.posts.push(post);//push the new post to the array post
         this.postsUpdated.next([...this.posts]);
       })
-    //if these 2 lines are outside the .subscribe right above, it is called optimistic updating the front-end because you are adding the 
-    //post to the posts list without knowing for sure that the backend accepted the newly post. if you don't want optimistic updating, 
-    //move the lines inside the .subscribe() 
+    //if these 2 lines are outside the .subscribe right above, it is called optimistic updating the front-end because you are adding the
+    //post to the posts list without knowing for sure that the backend accepted the newly post. if you don't want optimistic updating,
+    //move the lines inside the .subscribe()
     //this.posts.push(post);//push the new post to the array post
     //also push the array that was renamed to the Subject. next is like push() and also emit(). So when you use .next() you can listen
     //to it afterwards
     //this.postsUpdated.next([...this.posts]);
   }
 
+  deletePost(postId: string) {
+    //console.log('postId:',postId);
+    this.http.delete("http://localhost:3000/api/posts/" + postId)
+      .subscribe(()=>{
+        console.log('deleted');
+        //create a new updatedPosts array after deleting the one that was requested.
+        //filter loops through the array of posts or whatever array you provide. every array with a property name defined below that matches the postId that was deleted, will return false. meaning they should be filtered out.
+        //all others post array that do not match that postId, will return true and they will still show on front-end
+        const updatedPosts = this.posts.filter(post=>{
+          return post.id !== postId;
+        })
+        this.posts = updatedPosts;//set the array Posts to the new updated posts array after deletions
+        this.postsUpdated.next([...this.posts]);
+      })
+  }
+
 
 }
+
