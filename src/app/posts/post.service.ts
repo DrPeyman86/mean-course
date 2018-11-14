@@ -72,10 +72,24 @@ export class PostsService {
   //method to call by components to add a post to the posts array
   addPost(title: string, content: string) {
     const post: Post = {id: null, title: title, content: content};
-    this.posts.push(post);//push the new post to the array post
+    //emit an event to the backend here. post receives back a generic type object, which we know it will just be a message that is 
+    //of string type. 
+    //for the .post() method, you pass a second argument of what you want to post to that path URL
+    this.http.post<{message: string}>('http://localhost:3000/api/posts', post)
+      .subscribe((responseData)=>{
+        console.log(responseData.message);
+        //if you have these lines inside the .subscribe() it will only add the newly post if and only if the post was added to the server
+        //successfully. Because the .subscribe() will only run if the backend code returns no errors.
+        this.posts.push(post);//push the new post to the array post
+        this.postsUpdated.next([...this.posts]);
+      })
+    //if these 2 lines are outside the .subscribe right above, it is called optimistic updating the front-end because you are adding the 
+    //post to the posts list without knowing for sure that the backend accepted the newly post. if you don't want optimistic updating, 
+    //move the lines inside the .subscribe() 
+    //this.posts.push(post);//push the new post to the array post
     //also push the array that was renamed to the Subject. next is like push() and also emit(). So when you use .next() you can listen
     //to it afterwards
-    this.postsUpdated.next([...this.posts]);
+    //this.postsUpdated.next([...this.posts]);
   }
 
 
