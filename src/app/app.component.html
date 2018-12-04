@@ -5,7 +5,7 @@
   <!--app-post-create selector is from the post-create.component.ts. here the tag (postCreated) is listening to the same name
   defined in the post-create.component.ts file. Using Event binding, So when the event is triggered, it will run a local method in this component
 called onPostAdded with the special $event variable that gives you access to the data passed down through postCreated-->
-  
+
   <!-- <app-post-create (postCreated)="onPostAdded($event)"></app-post-create>
   <app-post-list [posts]="storedPosts"></app-post-list>-->
   <!--once storedPosts is set inside of app.component.ts, send posts property
@@ -14,10 +14,13 @@ called onPostAdded with the special $event variable that gives you access to the
     <!--V2-->
     <!--once you move to services where you can inject objects through components using the @Injectible decorator in the services file, you
       will not be listening to custom events from a component and sending its data to it, and then setting it as a property in this component.-->
-    <!--you will remove all event listening andd property bindings since all that's is done for you in the services and components will be looking 
+    <!--you will remove all event listening andd property bindings since all that's is done for you in the services and components will be looking
       for these changes with the services methods avaialble-->
     <!--commment out the custom tags above with event and property binding-->
-    <app-post-create></app-post-create>
-    <app-post-list></app-post-list>
+    <!-- <app-post-create></app-post-create>
+    <app-post-list></app-post-list> -->
 
+    <!--V3 after you have added routing, you would delete the 2 custom elements right above and use this version below-->
+    <!--router-outlet is an angular directive which is included with the Angular Router Module package-->
+    <router-outlet></router-outlet>
 </main>

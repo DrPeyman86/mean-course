@@ -84,6 +84,12 @@ export class PostsService {
     return this.postsUpdated.asObservable();//return the postUpdated subject as object that we can listen to
   }
 
+  //method to get posts that have an Id.
+  getPost(id: string) {
+    //use the "spread operator" to copy the original array to a new object so that you do not accidently overwrite the original array
+    return {...this.posts.find(post => post.id === id)};//use the .find() method to search all posts array. return the single post that matches with the id that was sent into this method.
+  }
+
   //method to call by components to add a post to the posts array
   addPost(title: string, content: string) {
     const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
@@ -111,6 +117,15 @@ export class PostsService {
     //to it afterwards
     //this.postsUpdated.next([...this.posts]);
   }
+
+  updatePost(id: string, title: string, content: string) {
+    const post: Post = { id: id, title: title, content: content };
+
+    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, post)//send the id along with the URL
+      .subscribe((response)=>{
+        console.log(response);
+      })
+  };
 
   deletePost(postId: string) {
     //console.log('postId:',postId);

@@ -21,6 +21,7 @@ import { PostCreateComponent } from './posts/post-create/post-create.component';
 import { HeaderComponent } from './header/header.component';
 import { PostListComponent } from './posts/post-list/post-list.component';
 import { PostsService } from './posts/post.service';//you can add this service to the providers[] array in bottom. One of the methods of adding service to the angular app
+import { AppRoutingModule } from './app-routing.module';
 //import the component you want to register first
 //after the module is started, angular will reguster these certain components
 //which are declared. It also imports BrowserModule which is a module for browser framework.
@@ -38,6 +39,7 @@ import { PostsService } from './posts/post.service';//you can add this service t
   ],
   imports: [
     BrowserModule,
+    AppRoutingModule,
     FormsModule,
     BrowserAnimationsModule,//add the FormsModule directives package inside here
     MatInputModule,

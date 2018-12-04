@@ -1,9 +1,10 @@
 //import the Component object from angular/core files
-import { Component, EventEmitter, Output } from '@angular/core';//Output object is for emitting events outside the current component
+import { Component, EventEmitter, Output, OnInit} from '@angular/core';//Output object is for emitting events outside the current component
 
 import { Post } from '../post.model';
 import { NgForm } from "@angular/forms";
 import { PostsService } from '../post.service'
+import { ActivatedRoute, ParamMap } from '@angular/router';//the ActivatedRoute gives us some information provided by angular of what the active route is that this component is being rendered to
 
 //the @Component is a decorator angular understands. @ sign and what follows angular will understand if its a keyword
 //at minimum @Component decorator requires a selector and templateUrl
@@ -17,19 +18,45 @@ import { PostsService } from '../post.service'
   styleUrls: ['./post-create.component.css']
 })
 
-export class PostCreateComponent {
+export class PostCreateComponent implements OnInit {
   enteredContent = '';
   enteredTitle = '';
+  private mode = 'create'//by default set this component as a create compponent
+  private postId: string;
+  public post: Post;
 
-  constructor(public postsService: PostsService){};//when component is initialized, run the constructor and get and set postsService 
+  constructor(public postsService: PostsService, public route: ActivatedRoute){};//when component is initialized, run the constructor and get and set postsService
+  //when the component is initialized, the ActivatedRoute type binded to the property called route provides some information as to the route we are currently on
   //property from the PostsService service
 
+  ngOnInit() {
+    //it is good practice you do not do anythign with routes inside the constructor, but rather do it in the ngOnInit when the component is initialized
+    //you can extract certain things from the param of the URL by following
+    //.paramMap is an observable so you have to subscribe to it and all built in observables we never need to unsubscribe. although unsubscribe could be done to free up memory
+    //params are observables because they could change while you are on a certain page, for example for postId parameter you could have clicked on some link to Edit another post, so while you are the same page, the param would change
+    //paramMap: ParamMap send to the callback function of .subscribe() so that you can see what properties of that ParamMap type are coming in
+    this.route.paramMap.subscribe((paramMap: ParamMap)=>{
+      //if the Url has a postId param, than we are under the edit option of this component. so get the postId from the URL.
+      if (paramMap.has('postId')){
+        this.mode = 'edit';
+        this.postId = paramMap.get('postId');//set the postId of this component to the postId from the URL
+        this.post = this.postsService.getPost(this.postId);//set the post property in this component to whatever postId was received from the .getPost() method for the postServices
+      //if postId is not found in URL, we are on default page of this component, which is just to create
+      } else {
+        this.mode = 'create';
+        this.postId = null;
+        this.post.title = '';
+        this.post.content = '';
+      }
+    });
+  }
+
   //postCreated can be anything you want. It is the name of the event you are emitting
-  //once you start using the PostsService service, you no longer need an @Output decorator to emit your event because the servie will 
-  //inject that object to components using that service. 
+  //once you start using the PostsService service, you no longer need an @Output decorator to emit your event because the servie will
+  //inject that object to components using that service.
   //@Output() postCreated = new EventEmitter<Post>();//Output decorater turns this event so that it can be listened to from outside
 
-  
+
 
   //the PARENT component where your selector above is rendering is the PARENT component.
   //and the component listening would be where you have this compnent being rendered to above in the "selector" so wherver that tag is, that's the component that
@@ -49,7 +76,7 @@ export class PostCreateComponent {
  //since adding directive two-way binding on the element use below syntax rather than above
  //no longer need to pass in the element individually since the directive will automatically update the value on each time this function is ran by whatever element
  //form: NGform we know what will enter in this function is a form of a ngForm directive object. So we have access to the elements inside that form
- onAddPost(form: NgForm) {
+ onSavePost(form: NgForm) {
     //alert('Post added!');
     //console.dir(postInput);
     //this.newPost = this.enteredValue;
@@ -72,7 +99,15 @@ export class PostCreateComponent {
     //once start using the PostsServices service, you no longer need the several codes above. replace the several codes with below
     //the below will call the addPost() method in postsService service, and the service has an Injectible decorator which will allow that
     //posts array to be used from other components using that service
-    this.postsService.addPost(form.value.title, form.value.content)
+    //this.postsService.addPost(form.value.title, form.value.content)
+
+    //V3 after adding routing of adding and updating posts to this component use following code instaed of line above
+    if (this.mode === 'create') {
+      this.postsService.addPost(form.value.title, form.value.content);
+    } else {
+      this.postsService.updatePost(this.postId, form.value.title, form.value.content);
+    }
+
     form.resetForm();
 
   }

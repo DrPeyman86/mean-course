@@ -32,7 +32,7 @@ app.use((req,res,next)=>{
   res.setHeader('Access-Control-Allow-Origin', "*");//which domains are able to access the resources from backend
   //this will allow requests to be made with these special headers. The requests do not need to include these headers, but they can. and no other special header will be allowed
   res.setHeader("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept")
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");//define what methods can be sent to the backend app. OPTIONS is important because by default it sends OPTIONS method along with any other
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");//define what methods can be sent to the backend app. OPTIONS is important because by default it sends OPTIONS method along with any other
   //method, but if you explicity define which methods can be sent like GET, POST... and then not include "OPTIONS" the app will break.
   next();//should be able to continue
 })
@@ -57,6 +57,24 @@ app.post("/api/posts",(req,res, next)=>{
 });
 //app.get();
 //app.put();
+
+//put requests to put a new resource altogether and replace the previous one.
+//patch to only update an existing resource with new values
+app.put('/api/posts/:id', (req,res,next)=>{
+  //since we are doing .put() create a new instance of the Post() model. so that technically the update process creates a whole new record
+  const post = new Post({
+    _id: req.params.id,//set the newly created Post to the same id as it was before
+    title: req.body.title,
+    content: req.body.content
+  })
+  //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
+  Post.updateOne({_id: req.params.id}, post).then(result=>{
+    console.log(result);
+    res.status(200).json({
+      message: 'Update Successful'
+    })
+  })
+})
 
 //when this path is called in client side, this code will run
 //app.use('/api/posts', (req, res, next)=>{ <<<<<< you could also just do app.use, but app.get is more descriptive of what you want

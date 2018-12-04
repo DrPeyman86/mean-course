@@ -2,7 +2,7 @@
   <!--#postForm name can be whatever but it sets to a angular directive that has to be "ngForm" this will store the ngForm which is an
   angular form object into #postForm. so now #postForm as an object can be referenced to the (submit) event-->
   <!--ngForm used is an angular directive that gives the client access to the form object. The #reference can be named whatever, but ngForm is directive keyword-->
-  <form (submit)="onAddPost(postForm)" #postForm="ngForm">
+  <form (submit)="onSavePost(postForm)" #postForm="ngForm">
 
       <mat-form-field>
         <!-- <input
@@ -19,7 +19,7 @@
         <input
         matInput type="text"
         name="title"
-        ngModel
+        [ngModel]="post.title"
         required
         minlength="3"
         placeholder="Post Title"
@@ -46,7 +46,7 @@
         <!--this also makes validation easier-->
         <textarea matInput rows="4"
           name="content"
-          ngModel
+          [ngModel]="post.content"
           required
           minlength="3"
           placeholder="Post Content"

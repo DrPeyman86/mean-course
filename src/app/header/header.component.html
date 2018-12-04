@@ -1,1 +1,12 @@
-<mat-toolbar color="primary">MyMessages</mat-toolbar>
+<mat-toolbar color="primary">
+  <span><a mat-button routerLink="/">My Messages</a></span>
+  <span class="spacer"></span>
+  <ul>
+    <li>
+      <!--routerLink attribute is actually an angular Directive used by angular router to turn this into a normal link when clicks are captured by angular router so that it will
+      stop the default behaviof of sending a hTTP request and then just rerender the page for the page we are trying to visit -->
+      <!--routerLinkActive is also another angular directive, which senses which <a> is active on the page. and if it is active, it will assign the "mat-accent" type of element to that element-->
+      <a mat-button routerLink="/create" routerLinkActive="mat-accent">New Post</a>
+    </li>
+  </ul>
+</mat-toolbar>
