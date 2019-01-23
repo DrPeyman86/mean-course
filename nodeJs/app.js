@@ -84,6 +84,7 @@ app.get('/api/posts', (req, res, next)=>{
   //   { id: "12431sdfasd", title: "First server-side post", content: "This coming from server"},
   //   { id: "12152sfdsf", title: "Second server-side post", content: "This second coming from server"}
   // ];
+  //console.log('here');
   Post.find()
     .then((documents)=>{
       //console.log(documents);

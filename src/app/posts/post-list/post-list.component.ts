@@ -56,6 +56,7 @@ ngOnInit() {
   this.postsSub = this.postsService.getPostsUpdateListener()
     .subscribe((posts: Post[])=>{
       //posts is what we are receiving from the next() method when adding posts
+      console.log('posts', this.posts);
       this.posts = posts;
     });//.subscribe sets up a subscription which takes 3 arguments, a function() argument, an error callback, and a complete successfully callback
 }

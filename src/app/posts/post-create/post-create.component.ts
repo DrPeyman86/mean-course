@@ -40,13 +40,14 @@ export class PostCreateComponent implements OnInit {
       if (paramMap.has('postId')){
         this.mode = 'edit';
         this.postId = paramMap.get('postId');//set the postId of this component to the postId from the URL
+        //console.log('postid: ', this.postId);
         this.post = this.postsService.getPost(this.postId);//set the post property in this component to whatever postId was received from the .getPost() method for the postServices
       //if postId is not found in URL, we are on default page of this component, which is just to create
       } else {
         this.mode = 'create';
         this.postId = null;
-        this.post.title = '';
-        this.post.content = '';
+        this.post.title = 'ts';
+        this.post.content = 'ts';
       }
     });
   }

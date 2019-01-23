@@ -50,8 +50,8 @@
           required
           minlength="3"
           placeholder="Post Content"
-          #content="ngModel"><!--list ngForm, ngModel will give you access to this input and store it as a local object in #content-->
-        </textarea>
+          #content="ngModel">
+        </textarea><!--list ngForm, ngModel will give you access to this input and store it as a local object in #content-->
         <mat-error *ngIf="content.invalid">Please enter a post content</mat-error><!--content is the #content referenced above-->
       </mat-form-field>
         <!--hashtag referenced elements can now be added to the event listener function being called-->
