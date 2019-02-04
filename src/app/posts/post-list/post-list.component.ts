@@ -22,18 +22,19 @@ export class PostListComponent implements OnInit, OnDestroy {
   //once you use the PostsService service, since you will use methods from that class to either get/set your objects, you do not need
   //the @Input decorator above.
 
-  private postsSub: Subscription;//postsSub is of type of Subscription
+  private postsSub: Subscription;// postsSub is of type of Subscription
 
   //add the @Input decorated bind to the posts list
   //Post[] creates that interface defined so that posts coming into this component will adhere to the Post interface defined in post.model.ts
-  postsService: PostsService;///define an empty property of type PostService
+
+  //postsService: PostsService;///define an empty property of type PostService. you can also escape writing this line by just putting "public" in the constructor in front of the service
 
   //constructor is just a function which is called whenever Angular creates an instance of this component
   //in constructor you can expect arguments, but since Angular is the one creating you the instance of this component, Angular has to give you these
   //arguments with "dependency injection" which angular is able to find out what you want and give you what you wanted
   //postsService: is the service you want to have. PostService is the type you are giving Angular a hint about what Angular should give you
-constructor(postsService: PostsService) {
-  this.postsService = postsService;
+constructor(public postsService: PostsService) {
+  //this.postsService = postsService;
 }
 //or you can omit the above few lines with below.
 //the public keyword in typescript will automatically create a new empty property in the component and store the incoming value in that property
@@ -49,6 +50,7 @@ ngOnInit() {
   //V2 -- after adding httpClient to post.service.ts, you do not need to set this.posts to the return results of this.postsService.getPosts since it's not returning anyhing.
   //just trigger the method to call the http request now
   //and since we have the .subscribe subscription, you will be able to render the posts once they are there
+  // this.posts =
   this.postsService.getPosts();
 
   //add a listener to that Subject

@@ -23,6 +23,8 @@ export class PostCreateComponent implements OnInit {
   enteredTitle = '';
   private mode = 'create'//by default set this component as a create compponent
   private postId: string;
+  private title: string;
+  private content: string;
   public post: Post;
 
   constructor(public postsService: PostsService, public route: ActivatedRoute){};//when component is initialized, run the constructor and get and set postsService
@@ -46,8 +48,8 @@ export class PostCreateComponent implements OnInit {
       } else {
         this.mode = 'create';
         this.postId = null;
-        this.post.title = 'ts';
-        this.post.content = 'ts';
+        this.title = null;
+        this.content =`9` null;
       }
     });
   }

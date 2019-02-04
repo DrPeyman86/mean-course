@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';//needed when adding the @Injectable(
 //without observables, if you add a post in post-create, even though the post will be added to the posts array by the
 //addPost() method. however post-list is calling getPosts() and renaming that array to something else, so it won't know what is inside
 //of that array at that point.
-//one option is to not rename that array in getPosts() method.
+//one option is to not rename that array in getPosts() method. so just have {return this.posts} rather than return [...this.posts]
 //another option is to use observables by using the rxjs package that comes with angular.
 import { Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -29,7 +29,9 @@ import { stringify } from '@angular/core/src/render3/util';
 @Injectable({
   providedIn: 'root'//root is important. provides this service on the root level directory of the app, so that the service is avaialble in
   //components. You could also go into app.module.ts, import the service you created, and add the service object in the "providers" array. Both
-  //will give you the same results. The @Injectable option is less work
+  //will give you the same results. The @Injectable option is less work. ALso the @Injectable directive only gives you one instance of this service,
+  //whereas if you define this service in app.module.ts, it would give you multiple instances of this service, whereever it is being used from. so than in that
+  //case posts[] will not be the same every instance this service is being initizalied. So the @injectable giving 1 instance is the best method
 })
 
 export class PostsService {
@@ -50,7 +52,9 @@ export class PostsService {
     //so to make a true copy of the posts array, need to use typescript and NExGen JS feature called "spread operator"
     //you use the "spread operator" by adding square brackets to create the new array from posts array prefixed by three dots to take all the elements from
     //the posts array to the other array created
+
     //return [...this.posts];//create a new array from the old posts array using spread operator.
+
     //if you add/remove elements from other components to the new copied array, it will never effect the original array
 
     //V2 after adding httpClient to this code. use the following code
@@ -62,13 +66,16 @@ export class PostsService {
       .get<{message: string, posts: any}>(//post type is no longer Post[] because posts coming from backend is with an "underscore" in front of id...so change to any for now.
         'http://localhost:3000/api/posts'
         )
-       //map method expects an object/argument that is the object that comes back from the observables stream. so in .get() request, it expects that returned result
+      //.pipe a method that accepts certain observable operators where you can manipuate the data coming in from the http request before the data is handled in the subscription
+       //map is an observable operator method expects an object/argument that is the object that comes back from the observables stream. so in .get() request, it expects that returned result
       .pipe(map((postData)=>{
+        //map takes an array and can replace all properties with some other property and return it as a new array. .pipe() will also return an Observable so the .subscribe can still subscribe to it
         return postData.posts.map(post=> {
+          //every element called "post" here will be retuned as a new object defined below so that the properties of that object matches with the Post[] array defined.
           return {
             title: post.title,
             content: post.content,
-            id: post._id
+            id: post._id//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
           };
         });
       }))//place a pipe to manipulate the data before the .subscribe chain so that you may want to rename some fields to match with what's in front-end. like "_id" to "id". pipe() is an obserable method that accepts certain operators
@@ -81,7 +88,7 @@ export class PostsService {
   }
 
   getPostsUpdateListener() {
-    return this.postsUpdated.asObservable();//return the postUpdated subject as object that we can listen to
+    return this.postsUpdated.asObservable();//return the postUpdated subject as object that we can listen to. postsUpdated is private so we can't emit from other components, but we can pass the value to the components
   }
 
   //method to get posts that have an Id.
@@ -133,10 +140,11 @@ export class PostsService {
       .subscribe(()=>{
         console.log('deleted');
         //create a new updatedPosts array after deleting the one that was requested.
-        //filter loops through the array of posts or whatever array you provide. every array with a property name defined below that matches the postId that was deleted, will return false. meaning they should be filtered out.
+        //filter returns a subset of the array we use based on what value you pass in the filter. filter loops through the array of posts or whatever array you provide.
+        //every array with a property name defined below that matches the postId that was deleted, will return false. meaning they should be filtered out.
         //all others post array that do not match that postId, will return true and they will still show on front-end
         const updatedPosts = this.posts.filter(post=>{
-          return post.id !== postId;
+          return post.id !== postId;//postId is what we deleted, so return every other post.id that is not equal to postId as true, which means those post.id will go inside the updatedPosts
         })
         this.posts = updatedPosts;//set the array Posts to the new updated posts array after deletions
         this.postsUpdated.next([...this.posts]);

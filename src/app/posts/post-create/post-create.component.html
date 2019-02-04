@@ -19,8 +19,8 @@
         <input
         matInput type="text"
         name="title"
-        [ngModel]="post.title"
         required
+        ngModel
         minlength="3"
         placeholder="Post Title"
         #title="ngModel"><!--list ngForm, ngModel will give you access to this input and store it as a local object in #title. used for the mat-error below-->
@@ -44,10 +44,11 @@
         </textarea> -->
         <!--new Version-->
         <!--this also makes validation easier-->
-        <textarea matInput rows="4"
+        <textarea matInput
+          rows="4"
           name="content"
-          [ngModel]="post.content"
           required
+          ngModel
           minlength="3"
           placeholder="Post Content"
           #content="ngModel">
