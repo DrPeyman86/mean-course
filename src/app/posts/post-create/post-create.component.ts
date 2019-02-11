@@ -49,7 +49,7 @@ export class PostCreateComponent implements OnInit {
         this.mode = 'create';
         this.postId = null;
         this.title = null;
-        this.content =`9` null;
+        this.content = null;
       }
     });
   }
