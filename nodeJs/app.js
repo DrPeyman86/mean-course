@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
-const Posts = require('./models/postsSql')
+//const Posts = require('./models/postsSql')
 
 //UP5HYhHj42q6bDNt//mongodb password
 
@@ -65,13 +65,13 @@ app.post("/api/posts",(req,res, next)=>{
 app.put('/api/posts/:id', (req,res,next)=>{
   //since we are doing .put() create a new instance of the Post() model. so that technically the update process creates a whole new record
   const post = new Post({
-    _id: req.params.id,//set the newly created Post to the same id as it was before
+    _id: req.body.id,//set the newly created Post to the same id as it was before
     title: req.body.title,
     content: req.body.content
   })
   //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
   Post.updateOne({_id: req.params.id}, post).then(result=>{
-    console.log(result);
+    //console.log(result);
     res.status(200).json({
       message: 'Update Successful'
     })
@@ -108,6 +108,19 @@ app.get('/api/posts', (req, res, next)=>{
   //   message: "Posts fetches successfully",
   //   posts: posts
   // });
+})
+
+//route to get the post info from the post edit/create page so that if the page was
+//reloaded on the edit page, it will render the post data and populate the fields without needing to 
+//go back to the main page and clicking Edit button.
+app.get('/api/posts/:id',(req,res,next)=>{
+  Post.findById(req.params.id).then((post)=>{
+    if (post) {
+      res.status(200).json(post)
+    } else {
+      res.status(404).json({message: 'Post not found'})
+    }
+  })
 })
 
 app.delete(`/api/posts/:id`,(req,res,next)=>{

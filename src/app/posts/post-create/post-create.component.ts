@@ -43,8 +43,19 @@ export class PostCreateComponent implements OnInit {
         this.mode = 'edit';
         this.postId = paramMap.get('postId');//set the postId of this component to the postId from the URL
         //console.log('postid: ', this.postId);
-        this.post = this.postsService.getPost(this.postId);//set the post property in this component to whatever postId was received from the .getPost() method for the postServices
-      //if postId is not found in URL, we are on default page of this component, which is just to create
+        //this.post = this.postsService.getPost(this.postId);//set the post property in this component to whatever postId was received from the .getPost() method for the postServices
+     
+        //v2 - since we changed .getPost() method to return an observable, we can just call the function and .subscribe to it rather than setting a property like above line
+        //do not need to unsubscribe because angular will take care of it
+        this.postsService.getPost(this.postId).subscribe((postData)=>{
+          console.log(postData);
+          this.post = {id: postData._id, title: postData.title, content: postData.content};
+          this.postId = postData._id;
+          this.title = postData.title;
+          this.content = postData.content;
+        })
+
+        //if postId is not found in URL, we are on default page of this component, which is just to create
       } else {
         this.mode = 'create';
         this.postId = null;
