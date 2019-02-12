@@ -94,7 +94,15 @@ export class PostsService {
   //method to get posts that have an Id.
   getPost(id: string) {
     //use the "spread operator" to copy the original array to a new object so that you do not accidently overwrite the original array
-    return {...this.posts.find(post => post.id === id)};//use the .find() method to search all posts array. return the single post that matches with the id that was sent into this method.
+    //return {...this.posts.find(post => post.id === id)};//use the .find() method to search all posts array. return the single post that matches with the id that was sent into this method.
+    //the above line returns a post
+    //if we make a http request here this will be asynchronous code and you can't return inside a subscription. you need to return syncrhonously.
+    //V2 - to add ability to refresh the edit/create page so that the posts being edited will populate back
+    //this.http.get already returns an observable, so whereever this method is being called, you can just subscribe to it
+    return this.http.get<{_id: string, title: string, content: string}>(
+      'http://localhost:3000/api/posts/' + id
+      );
+  
   }
 
   //method to call by components to add a post to the posts array
@@ -128,9 +136,17 @@ export class PostsService {
   updatePost(id: string, title: string, content: string) {
     const post: Post = { id: id, title: title, content: content };
 
-    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, post)//send the id along with the URL
+    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, post)//send the id along with the URL. 2nd argument is the payload you are sending to backend
       .subscribe((response)=>{
-        console.log(response);
+        //console.log(response);
+        //without refreshing the page, want to be able to update the front-end with the newly updated post data
+        const updatedPosts = [...this.posts]//first create a new array of exactly the same array
+        const oldPostIndex = updatedPosts.findIndex(p=>p.id === post.id)//findIndex() takes a function that will return where some logic is defined. here we want to 
+        //find the p.id in the updatedPosts array that equals the post.id value that was updated so that we can update the data on that post
+        updatedPosts[oldPostIndex] = post;//set the index of the array to the newly updated data
+        this.posts = updatedPosts;//reset the original posts array property to the updatedPosts defined
+        //tell the app with this event by calling .next() and sending postsUpdated which is a subject
+        this.postsUpdated.next([...this.posts]);//
       })
   };
 

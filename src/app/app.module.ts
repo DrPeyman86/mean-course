@@ -39,7 +39,7 @@ import { AppRoutingModule } from './app-routing.module';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
+    AppRoutingModule,//name of the Router defined in app-routing.module.ts
     FormsModule,
     BrowserAnimationsModule,//add the FormsModule directives package inside here
     MatInputModule,

@@ -14,7 +14,7 @@ const routes: Routes = [
 
 @NgModule({
   imports : [RouterModule.forRoot(routes)],//need to inform the Angular Router module about our routes we have defined.
-  exports: [RouterModule]
+  exports: [RouterModule]//have to export the RouterModule so that we can use it in app.module.ts
 })
 export class AppRoutingModule {
 

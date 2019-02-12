@@ -16,11 +16,13 @@
         <!--name is needed to reference this input in angular-->
         <!--ngModel tells angular this is a directive input which angular automatically add this field as a controller to the form. Name is required in this case-->
         <!--this also makes validation easier-->
+        <!--the ELVIS Operator ? behind an object. Will check if the object exists before it tries to read a property of it. This can save bugs where an object is undefined
+        when page loads because the backend is trying to send data to define that object where it needs time doing that-->
         <input
         matInput type="text"
         name="title"
         required
-        ngModel
+        [ngModel]="post?.title"
         minlength="3"
         placeholder="Post Title"
         #title="ngModel"><!--list ngForm, ngModel will give you access to this input and store it as a local object in #title. used for the mat-error below-->
@@ -48,7 +50,7 @@
           rows="4"
           name="content"
           required
-          ngModel
+          [ngModel]="post?.title"
           minlength="3"
           placeholder="Post Content"
           #content="ngModel">
