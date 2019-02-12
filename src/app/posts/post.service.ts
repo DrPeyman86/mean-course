@@ -101,7 +101,7 @@ export class PostsService {
   addPost(title: string, content: string) {
     const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
     //deletion process would fail.
-    //option 1: to call getPost() after the .subscribe(), inside of it. so that it will fetch the newly posts so that the "id" field will also get its value. Not best option
+    //option 1: to call getPost() after the .subscribe(), inside of it. so that it will fetch the newly posts so that the "id" field will also get its value. Not best option because that would get back every post after just one post addition. redundant.
     //option 2: better option - get back the id that was newly created. Do this in app.js in backend code
     //emit an event to the backend here. post receives back a generic type object, which we know it will just be a message that is
     //of string type.
