@@ -18,6 +18,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   //   {title: 'Third Post', content: 'This is the Third post\'s conent"'}
   // ];
   //@Input()
+  isLoading = false;
   posts: Post[] = [];//make the post property bindable from outside by property binding. do this with @Input dectorator
   //once you use the PostsService service, since you will use methods from that class to either get/set your objects, you do not need
   //the @Input decorator above.
@@ -51,6 +52,7 @@ ngOnInit() {
   //just trigger the method to call the http request now
   //and since we have the .subscribe subscription, you will be able to render the posts once they are there
   // this.posts =
+  this.isLoading = true;
   this.postsService.getPosts();
 
   //add a listener to that Subject
@@ -59,6 +61,7 @@ ngOnInit() {
     .subscribe((posts: Post[])=>{
       //posts is what we are receiving from the next() method when adding posts
       console.log('posts', this.posts);
+      this.isLoading = false;
       this.posts = posts;
     });//.subscribe sets up a subscription which takes 3 arguments, a function() argument, an error callback, and a complete successfully callback
 }

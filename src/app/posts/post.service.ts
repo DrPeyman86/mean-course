@@ -1,5 +1,5 @@
 import { Post } from './post.model';
-import { Injectable } from '@angular/core';//needed when adding the @Injectable()
+import { Injectable} from '@angular/core';//needed when adding the @Injectable()
 //Observables??? -- essentially help us pass objects around
 //without observables, if you add a post in post-create, even though the post will be added to the posts array by the
 //addPost() method. however post-list is calling getPosts() and renaming that array to something else, so it won't know what is inside
@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 
 import { HttpClient } from '@angular/common/http';//import the httpclient to components or services in this case that you want the backend to communicate with
 import { stringify } from '@angular/core/src/render3/util';
+import { Router } from '@angular/router';//router provides tool to the service so that when certain methods are finisehd, you can re-route the page to different pages
 
 //service is a typescript class
 //service is a class which you can inject into different components. the service is able to centralize some tasks and provide easy access
@@ -41,7 +42,8 @@ export class PostsService {
   private postsUpdated = new Subject<Post[]>();//send the Post type array to the Subject generic type
 
 
-  constructor(private http: HttpClient) {}//inject the HttpClient to this service. Bind a private HttpClient type to the property named http or whatever you wanted
+  //set the router property which is of type Router from angular
+  constructor(private http: HttpClient, private router: Router) {}//inject the HttpClient to this service. Bind a private HttpClient type to the property named http or whatever you wanted
 
   //return the posts if they call this method
   getPosts() {
@@ -123,6 +125,7 @@ export class PostsService {
         post.id = postId;//update the post object defined above where the id was initially null...to update its "id" property to the "id" returned from backend so that the front-end will know of its value the first time without needing to reload page.
         this.posts.push(post);//push the new post to the array post
         this.postsUpdated.next([...this.posts]);
+        this.router.navigate(["/"])//pass as argument an array of segments. send the page back to the main page since the main page is just "/"
       })
     //if these 2 lines are outside the .subscribe right above, it is called optimistic updating the front-end because you are adding the
     //post to the posts list without knowing for sure that the backend accepted the newly post. if you don't want optimistic updating,
@@ -135,7 +138,7 @@ export class PostsService {
 
   updatePost(id: string, title: string, content: string) {
     const post: Post = { id: id, title: title, content: content };
-
+    
     this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, post)//send the id along with the URL. 2nd argument is the payload you are sending to backend
       .subscribe((response)=>{
         //console.log(response);
@@ -144,9 +147,12 @@ export class PostsService {
         const oldPostIndex = updatedPosts.findIndex(p=>p.id === post.id)//findIndex() takes a function that will return where some logic is defined. here we want to 
         //find the p.id in the updatedPosts array that equals the post.id value that was updated so that we can update the data on that post
         updatedPosts[oldPostIndex] = post;//set the index of the array to the newly updated data
+        //console.log(post.id);
+        //console.dir(updatedPosts);
         this.posts = updatedPosts;//reset the original posts array property to the updatedPosts defined
         //tell the app with this event by calling .next() and sending postsUpdated which is a subject
         this.postsUpdated.next([...this.posts]);//
+        this.router.navigate(["/"])//send the page back to the main page since the main page is just "/"
       })
   };
 

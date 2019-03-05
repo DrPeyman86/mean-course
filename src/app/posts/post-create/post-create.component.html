@@ -2,7 +2,8 @@
   <!--#postForm name can be whatever but it sets to a angular directive that has to be "ngForm" this will store the ngForm which is an
   angular form object into #postForm. so now #postForm as an object can be referenced to the (submit) event-->
   <!--ngForm used is an angular directive that gives the client access to the form object. The #reference can be named whatever, but ngForm is directive keyword-->
-  <form (submit)="onSavePost(postForm)" #postForm="ngForm">
+  <mat-spinner *ngIf="isLoading"></mat-spinner>
+  <form (submit)="onSavePost(postForm)" #postForm="ngForm" *ngIf="!isLoading">
 
       <mat-form-field>
         <!-- <input
@@ -30,6 +31,15 @@
         <!--you can also reference the postForm to get the element that you want to check for validity-->
         <!-- <mat-error *ngIf="postForm.getControl('title').invalid">Please enter a post title</mat-error> -->
       </mat-form-field>
+
+      <div>
+        <button mat-stroked-button type="button" (click)="FilePicker.click()">Pick Image</button>
+        <!--do not want the ugly default visual display of the input file type field. 
+        instead we hid the field by CSS, but when the button above is clicked, we trigger the localreference on the input field-->
+        <input type="file" #FilePicker>
+      </div>
+
+
       <mat-form-field>
         <!--the [] wrapped around a property of an html object tells angular to target the underlying objects of the html element-->
         <!-- you can add a string inside the quotations mark by single quotes. or if you add something inside double quotes

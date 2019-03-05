@@ -4,8 +4,12 @@ const mongoose = require('mongoose');
 //const Posts = require('./models/postsSql')
 
 //UP5HYhHj42q6bDNt//mongodb password
+const postsRoutes = require('./routes/post');
 
-const Post = require('./models/post')//Models should be capitalized first letter
+
+
+//no longer need Post model since we moved everything to routes/post.js
+//const Post = require('./models/post')//Models should be capitalized first letter
 
 const app = express();//create a new instance of app. the app can now be used after this point
 
@@ -38,101 +42,109 @@ app.use((req,res,next)=>{
   next();//should be able to continue
 })
 
-//this middleware will get executed for every single post() request. and also one for .get()
-app.post("/api/posts",(req,res, next)=>{
-  //const post = req.body;
-  const post = new Post({
-    title: req.body.title,
-    content: req.body.content
-  })//the Post model gives a constructor function which we can use to instantiate that object
-  //console.log(post);
-  //option 2 - of the issue we ran into where the id was not provided when we added new post. you called a .then() after the .save() to get the createdPosts id field and send that along with the message object back to front-end
-  post.save().then((createdPost)=>{
-    //console.log(results);
-    //201 means something was stored and was ok. 200 just means everytnhing was ok
-    res.status(201).json({
-      message: "post added successfully",
-      postId: createdPost._id
-    });//you don't need to send back the .json() data but you can
-  })//the save() is provided by mongoose for all models provided. mongoose will automatically write the insert query to write to the database
-
-});
-//app.get();
-//app.put();
-
-//put requests to put a new resource altogether and replace the previous one.
-//patch to only update an existing resource with new values
-app.put('/api/posts/:id', (req,res,next)=>{
-  //since we are doing .put() create a new instance of the Post() model. so that technically the update process creates a whole new record
-  const post = new Post({
-    _id: req.body.id,//set the newly created Post to the same id as it was before
-    title: req.body.title,
-    content: req.body.content
-  })
-  //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
-  Post.updateOne({_id: req.params.id}, post).then(result=>{
-    //console.log(result);
-    res.status(200).json({
-      message: 'Update Successful'
-    })
-  })
-})
-
-//when this path is called in client side, this code will run
-//app.use('/api/posts', (req, res, next)=>{ <<<<<< you could also just do app.use, but app.get is more descriptive of what you want
-app.get('/api/posts', (req, res, next)=>{
-  //res.send('Hello from express!');//send a response back to the client for every incoming request
-  // const posts = [
-  //   { id: "12431sdfasd", title: "First server-side post", content: "This coming from server"},
-  //   { id: "12152sfdsf", title: "Second server-side post", content: "This second coming from server"}
-  // ];
-  //console.log('here');
-  Post.find()
-    .then((documents)=>{
-      //console.log(documents);
-      res.status(200).json({
-        message: "Posts fetches successfully",
-        posts: documents
-      });
-    });//will return everything under that model
-
-  // Posts.findAll().then((posts)=>{
-  //   res.status(200).json({
-  //     message: "Posts fetched success",
-  //     posts: posts
-  //   })
-  // })
+//once you have router in app, just do this and the app will relay the routes to that file
+//.use() first argument will filter what URL you are calling and only send routes with the URL beginning
+//with whatever is in first argument to that routes object defined in 2nd argument
+app.use("/api/posts", postsRoutes);
 
 
-  // res.status(200).json({
-  //   message: "Posts fetches successfully",
-  //   posts: posts
-  // });
-})
+//replaced all routes below with routes/posts.js router method
 
-//route to get the post info from the post edit/create page so that if the page was
-//reloaded on the edit page, it will render the post data and populate the fields without needing to 
-//go back to the main page and clicking Edit button.
-app.get('/api/posts/:id',(req,res,next)=>{
-  Post.findById(req.params.id).then((post)=>{
-    if (post) {
-      res.status(200).json(post)
-    } else {
-      res.status(404).json({message: 'Post not found'})
-    }
-  })
-})
+// //this middleware will get executed for every single post() request. and also one for .get()
+// app.post("/api/posts",(req,res, next)=>{
+//   //const post = req.body;
+//   const post = new Post({
+//     title: req.body.title,
+//     content: req.body.content
+//   })//the Post model gives a constructor function which we can use to instantiate that object
+//   //console.log(post);
+//   //option 2 - of the issue we ran into where the id was not provided when we added new post. you called a .then() after the .save() to get the createdPosts id field and send that along with the message object back to front-end
+//   post.save().then((createdPost)=>{
+//     //console.log(results);
+//     //201 means something was stored and was ok. 200 just means everytnhing was ok
+//     res.status(201).json({
+//       message: "post added successfully",
+//       postId: createdPost._id
+//     });//you don't need to send back the .json() data but you can
+//   })//the save() is provided by mongoose for all models provided. mongoose will automatically write the insert query to write to the database
 
-app.delete(`/api/posts/:id`,(req,res,next)=>{
-  //console.log(req.params.id)//req.params gives you access to the params available in the url. like "id" in this case
-  Post.deleteOne({_id:req.params.id})
-    .then((result)=>{
-      //console.log(result);
-      res.status(200).json({
-        message: "post deleted"
-      })
-    });//delete the id that matches the _id in the table
+// });
+// //app.get();
+// //app.put();
 
-})
+// //put requests to put a new resource altogether and replace the previous one.
+// //patch to only update an existing resource with new values
+// app.put('/api/posts/:id', (req,res,next)=>{
+//   //since we are doing .put() create a new instance of the Post() model. so that technically the update process creates a whole new record
+//   const post = new Post({
+//     _id: req.body.id,//set the newly created Post to the same id as it was before
+//     title: req.body.title,
+//     content: req.body.content
+//   })
+//   //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
+//   Post.updateOne({_id: req.params.id}, post).then(result=>{
+//     //console.log(result);
+//     res.status(200).json({
+//       message: 'Update Successful'
+//     })
+//   })
+// })
+
+// //when this path is called in client side, this code will run
+// //app.use('/api/posts', (req, res, next)=>{ <<<<<< you could also just do app.use, but app.get is more descriptive of what you want
+// app.get('/api/posts', (req, res, next)=>{
+//   //res.send('Hello from express!');//send a response back to the client for every incoming request
+//   // const posts = [
+//   //   { id: "12431sdfasd", title: "First server-side post", content: "This coming from server"},
+//   //   { id: "12152sfdsf", title: "Second server-side post", content: "This second coming from server"}
+//   // ];
+//   //console.log('here');
+//   Post.find()
+//     .then((documents)=>{
+//       //console.log(documents);
+//       res.status(200).json({
+//         message: "Posts fetches successfully",
+//         posts: documents
+//       });
+//     });//will return everything under that model
+
+//   // Posts.findAll().then((posts)=>{
+//   //   res.status(200).json({
+//   //     message: "Posts fetched success",
+//   //     posts: posts
+//   //   })
+//   // })
+
+
+//   // res.status(200).json({
+//   //   message: "Posts fetches successfully",
+//   //   posts: posts
+//   // });
+// })
+
+// //route to get the post info from the post edit/create page so that if the page was
+// //reloaded on the edit page, it will render the post data and populate the fields without needing to 
+// //go back to the main page and clicking Edit button.
+// app.get('/api/posts/:id',(req,res,next)=>{
+//   Post.findById(req.params.id).then((post)=>{
+//     if (post) {
+//       res.status(200).json(post)
+//     } else {
+//       res.status(404).json({message: 'Post not found'})
+//     }
+//   })
+// })
+
+// app.delete(`/api/posts/:id`,(req,res,next)=>{
+//   //console.log(req.params.id)//req.params gives you access to the params available in the url. like "id" in this case
+//   Post.deleteOne({_id:req.params.id})
+//     .then((result)=>{
+//       //console.log(result);
+//       res.status(200).json({
+//         message: "post deleted"
+//       })
+//     });//delete the id that matches the _id in the table
+
+// })
 
 module.exports = app;//export the entire express app and all the middlewares

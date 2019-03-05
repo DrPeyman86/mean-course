@@ -1,4 +1,6 @@
-<mat-accordion multi="true" *ngIf="posts.length > 0"><!--multi="true" allows the accordion to be allowed to open as many as accordions as you want. false would collapse other one-->
+<mat-spinner *ngIf="isLoading"></mat-spinner>
+<!--having multiple if conditions add &&-->
+<mat-accordion multi="true" *ngIf="posts.length > 0 && !isLoading"><!--multi="true" allows the accordion to be allowed to open as many as accordions as you want. false would collapse other one-->
   <!--*ngIf is a structural directive that creates an if statement. Only render this element and anything inside to the DOM if it passes the if statement.-->
   <mat-expansion-panel *ngFor="let post of posts"><!--*ngFor creates a loop for your object. post is the individual value that you can use inside the loop. posts is the name of the object coming from the .ts file-->
     <mat-expansion-panel-header>
@@ -13,4 +15,4 @@
     </mat-action-row>
   </mat-expansion-panel>
 </mat-accordion>
-<p class="info-text mat-body-1" *ngIf="posts.length <= 0">No Posts yet</p>
+<p class="info-text mat-body-1" *ngIf="posts.length <= 0  && !isLoading">No Posts yet</p>

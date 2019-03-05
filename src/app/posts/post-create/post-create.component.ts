@@ -26,6 +26,7 @@ export class PostCreateComponent implements OnInit {
   private title: string;
   private content: string;
   public post: Post;
+  private isLoading = false;
 
   constructor(public postsService: PostsService, public route: ActivatedRoute){};//when component is initialized, run the constructor and get and set postsService
   //when the component is initialized, the ActivatedRoute type binded to the property called route provides some information as to the route we are currently on
@@ -44,7 +45,7 @@ export class PostCreateComponent implements OnInit {
         this.postId = paramMap.get('postId');//set the postId of this component to the postId from the URL
         //console.log('postid: ', this.postId);
         //this.post = this.postsService.getPost(this.postId);//set the post property in this component to whatever postId was received from the .getPost() method for the postServices
-     
+        this.isLoading = true;
         //v2 - since we changed .getPost() method to return an observable, we can just call the function and .subscribe to it rather than setting a property like above line
         //do not need to unsubscribe because angular will take care of it
         this.postsService.getPost(this.postId).subscribe((postData)=>{
@@ -53,6 +54,7 @@ export class PostCreateComponent implements OnInit {
           this.postId = postData._id;
           this.title = postData.title;
           this.content = postData.content;
+          this.isLoading = false;
         })
 
         //if postId is not found in URL, we are on default page of this component, which is just to create
@@ -103,6 +105,10 @@ export class PostCreateComponent implements OnInit {
     if (form.invalid) {
       return;
     }
+    //whenever creating a post, show the isLoading spinner. do not need to reset it to false
+    //because once you add a new post, the page goes to the main page anyway, which there it is defaulted to 
+    //false so spinner will go away again
+    this.isLoading = true;
 
     // const post: Post = {
     //   title: form.value.title,
