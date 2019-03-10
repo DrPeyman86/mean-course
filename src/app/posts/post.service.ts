@@ -77,7 +77,8 @@ export class PostsService {
           return {
             title: post.title,
             content: post.content,
-            id: post._id//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
+            id: post._id,//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
+            imagePath: post.imagePath
           };
         });
       }))//place a pipe to manipulate the data before the .subscribe chain so that you may want to rename some fields to match with what's in front-end. like "_id" to "id". pipe() is an obserable method that accepts certain operators
@@ -101,28 +102,43 @@ export class PostsService {
     //if we make a http request here this will be asynchronous code and you can't return inside a subscription. you need to return syncrhonously.
     //V2 - to add ability to refresh the edit/create page so that the posts being edited will populate back
     //this.http.get already returns an observable, so whereever this method is being called, you can just subscribe to it
-    return this.http.get<{_id: string, title: string, content: string}>(
+    //add the imagePath because you expect it returned as the backend
+    return this.http.get<{_id: string, title: string, content: string, imagePath: string}>(
       'http://localhost:3000/api/posts/' + id
       );
   
   }
 
   //method to call by components to add a post to the posts array
-  addPost(title: string, content: string) {
-    const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
+  addPost(title: string, content: string, image: File) {
+    //const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
+    
+    //JSON CAN"T INCLUDE A FILE. When you want to send files to backened. Need to send Form Data instead of JSON
+    const postData = new FormData();//FormData is a javascript objct that provides text values and blob data(blob means file values)
+    postData.append("title", title);
+    postData.append("content", content);
+    postData.append("image", image, title)//this image property is exactly what the backend is looking for. so name them the same. second argument is the file. third is the title of the file you want
     //deletion process would fail.
     //option 1: to call getPost() after the .subscribe(), inside of it. so that it will fetch the newly posts so that the "id" field will also get its value. Not best option because that would get back every post after just one post addition. redundant.
     //option 2: better option - get back the id that was newly created. Do this in app.js in backend code
     //emit an event to the backend here. post receives back a generic type object, which we know it will just be a message that is
     //of string type.
     //for the .post() method, you pass a second argument of what you want to post to that path URL
-    this.http.post<{message: string, postId: string}>('http://localhost:3000/api/posts', post)
+    //the generic types are what you expect from the backend and of what type they are
+    this.http.post<{message: string, post: Post}>('http://localhost:3000/api/posts', postData)//changed from "post" after adding "File" feature
       .subscribe((responseData)=>{
         //console.log(responseData.message);
         //if you have these lines inside the .subscribe() it will only add the newly post if and only if the post was added to the server
         //successfully. Because the .subscribe() will only run if the backend code returns no errors.
-        const postId = responseData.postId;
-        post.id = postId;//update the post object defined above where the id was initially null...to update its "id" property to the "id" returned from backend so that the front-end will know of its value the first time without needing to reload page.
+        
+        //const postId = responseData.postId;
+        //post.id = postId;//update the post object defined above where the id was initially null...to update its "id" property to the "id" returned from backend so that the front-end will know of its value the first time without needing to reload page.
+        
+        //after adding File Feature
+        //need to save the post after the backend returns no errors
+        const post: Post = {id: responseData.post.id, title: title, content: content, imagePath: responseData.post.imagePath};//we do not get the image yet back from backend, TODO TODO TODO
+
+        
         this.posts.push(post);//push the new post to the array post
         this.postsUpdated.next([...this.posts]);
         this.router.navigate(["/"])//pass as argument an array of segments. send the page back to the main page since the main page is just "/"
@@ -136,16 +152,39 @@ export class PostsService {
     //this.postsUpdated.next([...this.posts]);
   }
 
-  updatePost(id: string, title: string, content: string) {
-    const post: Post = { id: id, title: title, content: content };
+  //when adding the Update feature to the image feature. add image as argument. It can be of type File or String because when editing, you either have the regular image URL path,
+  //or if image was editted, it would be a new image all together, so it would be of type File. so have either or."image: File | String"
+  updatePost(id: string, title: string, content: string, image: File | String) {
+    let postData: Post | FormData;//initialize postData first because typescript won't know whether postData is going to be of type Post or FormData.
+    //const post: Post = { id: id, title: title, content: content, imagePath: null };
+    //typeof(image) object would mean it is a file because a file is a object. whereas a string is just a string
+    if(typeof(image)==="object") {
+      postData = new FormData();
+      postData.append("id", id)//add this otherwise it will break backened because you would be trying to update an _id in MOngoDB without sending an ID. need the ID so that it can generate a new ID when updating
+      postData.append("title", title);
+      postData.append("content", content);
+      //since in the arguments you have Image can be either an image or string, you have use generic types <File> to say that this image object is actually going to be a File
+      //since we already know it will be a file since the IF above. 
+      postData.append("image", <File>image, title)//this image property is exactly what the backend is looking for. so name them the same. second argument is the file. third is the title of the file you want
     
-    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, post)//send the id along with the URL. 2nd argument is the payload you are sending to backend
+    } else {
+      postData = { id: id, title: title, content: content, imagePath: image };
+    }
+    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, postData)//send the id along with the URL. 2nd argument is the payload you are sending to backend
       .subscribe((response)=>{
         //console.log(response);
         //without refreshing the page, want to be able to update the front-end with the newly updated post data
         const updatedPosts = [...this.posts]//first create a new array of exactly the same array
-        const oldPostIndex = updatedPosts.findIndex(p=>p.id === post.id)//findIndex() takes a function that will return where some logic is defined. here we want to 
+        const oldPostIndex = updatedPosts.findIndex(p=>p.id === id)//findIndex() takes a function that will return where some logic is defined. here we want to 
         //find the p.id in the updatedPosts array that equals the post.id value that was updated so that we can update the data on that post
+        
+        //define the post that was edited so that it can be updated below
+        const post: Post = {
+          id: id,
+          title: title,
+          content: content,
+          imagePath: 'response.imagePath'
+        }
         updatedPosts[oldPostIndex] = post;//set the index of the array to the newly updated data
         //console.log(post.id);
         //console.dir(updatedPosts);

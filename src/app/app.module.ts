@@ -1,6 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms'//this is the library needed to import to be able to use directives. not loaded by default
+import { ReactiveFormsModule } from '@angular/forms'//this is the library needed to import to be able to use directives. not loaded by default
+//the ReactiveFormsModule replaces normal FormsModule which is a template form method of handling form inputs and submissions.
+//ReactiveFrosmModule allows to define in typescript the form fields and validate reactively. 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';//this module is needed to send/recieve http requests from a backend code
 import {
@@ -41,7 +43,8 @@ import { AppRoutingModule } from './app-routing.module';
   imports: [
     BrowserModule,
     AppRoutingModule,//name of the Router defined in app-routing.module.ts
-    FormsModule,
+    //FormsModule,//this was repalced by ReactiveFormsModule
+    ReactiveFormsModule,
     BrowserAnimationsModule,//add the FormsModule directives package inside here
     MatInputModule,
     MatCardModule,

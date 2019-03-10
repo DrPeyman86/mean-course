@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
+const path = require('path');
 //const Posts = require('./models/postsSql')
 
 //UP5HYhHj42q6bDNt//mongodb password
@@ -25,6 +26,10 @@ mongoose.connect("mongodb+srv://peyman:UP5HYhHj42q6bDNt@cluster0-lb4pq.mongodb.n
 
 app.use(bodyParser.json());//use body-parser for all incoming requests parsing out json data
 app.use(bodyParser.urlencoded({extended: false}))//if you also want to parse urlencoded. extended false means to only allow default features when you are encoding
+//by default when you want to request a file from a folder stored in the backend will not be allowed. To allow a certain folder to be allowed to fetched from 
+//client side, use this middleware
+//path just forwards this route from "/images" to "backened/images" since the client side would not know the exact path of backened code. 
+app.use("/images", express.static(path.join("nodeJs/images")));//if client is requesting a URL of the "/images" path, static() middlware allows this to be fetched.
 
 // app.use((req, res, next)=>{
 //   console.log('First middleware');

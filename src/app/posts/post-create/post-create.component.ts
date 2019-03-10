@@ -2,9 +2,10 @@
 import { Component, EventEmitter, Output, OnInit} from '@angular/core';//Output object is for emitting events outside the current component
 
 import { Post } from '../post.model';
-import { NgForm } from "@angular/forms";
+import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { PostsService } from '../post.service'
 import { ActivatedRoute, ParamMap } from '@angular/router';//the ActivatedRoute gives us some information provided by angular of what the active route is that this component is being rendered to
+import { mimeType } from '../post-create/mime-type.validator'//import the validator 
 
 //the @Component is a decorator angular understands. @ sign and what follows angular will understand if its a keyword
 //at minimum @Component decorator requires a selector and templateUrl
@@ -27,12 +28,28 @@ export class PostCreateComponent implements OnInit {
   private content: string;
   public post: Post;
   private isLoading = false;
+  form: FormGroup; //need to now define the form programmatically. Need to store it in form of type FormGroup. FormGroup is a top level of Form. 
+  imagePreview: string;
 
   constructor(public postsService: PostsService, public route: ActivatedRoute){};//when component is initialized, run the constructor and get and set postsService
   //when the component is initialized, the ActivatedRoute type binded to the property called route provides some information as to the route we are currently on
   //property from the PostsService service
 
   ngOnInit() {
+    //this is how you would define a form with options on how to define a form field with validations, default values, etc. 
+    //formControl first argument is the default value of the field you are defining. second argument can be used for setting validations, options. 
+    this.form = new FormGroup({
+      'title': new FormControl(null, {
+        validators: [Validators.required, Validators.minLength(3)]
+      }),
+      'content': new FormControl(null, {
+        validators: [Validators.required]
+      }),
+      'image': new FormControl(null, {
+        validators: [Validators.required],
+        asyncValidators: [mimeType]
+      })
+    }) 
     //it is good practice you do not do anythign with routes inside the constructor, but rather do it in the ngOnInit when the component is initialized
     //you can extract certain things from the param of the URL by following
     //.paramMap is an observable so you have to subscribe to it and all built in observables we never need to unsubscribe. although unsubscribe could be done to free up memory
@@ -50,11 +67,24 @@ export class PostCreateComponent implements OnInit {
         //do not need to unsubscribe because angular will take care of it
         this.postsService.getPost(this.postId).subscribe((postData)=>{
           console.log(postData);
-          this.post = {id: postData._id, title: postData.title, content: postData.content};
-          this.postId = postData._id;
-          this.title = postData.title;
-          this.content = postData.content;
+          this.post = {id: postData._id,
+            title: postData.title,
+            content: postData.content,
+            imagePath: postData.imagePath//once you add imagePath to the return object of .getPost() in postsServices.ts
+          };
+          //this.postId = postData._id;
+          //this.title = postData.title;
+          //this.content = postData.content;
           this.isLoading = false;
+
+          //ReactiveFormsModule additions 
+          //add this to load the title and content value in case the "edit" button was clicked
+          //setValue would need to set all values of the formControls. 
+          this.form.setValue({
+            'title': this.post.title,
+            'content': this.post.content,
+            'image': this.post.imagePath//add this once you add the update feature of editing images. you want the image path set when the user clicks edit button so imagepath is populated
+          })
         })
 
         //if postId is not found in URL, we are on default page of this component, which is just to create
@@ -89,10 +119,40 @@ export class PostCreateComponent implements OnInit {
   //  //console.dir(postInput);
   //  this.newPost = postInput.value;
   // }
+
+//the argument is just a default javascript Event type you are expecting 
+onImagePicked(event: Event) {
+  //not having the (as HTMLInputElement) will not work since event.target.files does not know that the target field is an input field. 
+  //so you use (as HTMLInputElement) to convert the event.target to whatever you have after "as" and then you can access the .files property
+  const file = (event.target as HTMLInputElement).files[0];//files is an array of files so take the first element of that array
+  //this.form.patchValue sets only 1 control you define. 
+  //so here you are setting the image control to the file object. the file object is not just a text, it is the javascript file object.
+  this.form.patchValue({'image': file});
+  this.form.get('image').updateValueAndValidity();//this tells the form to re-evaluate the 'image' control and update it's validity on the page. so if the field was 
+  //coming back as invalid before this function, you would want to tell angular to re-evaluate it so that the invalid error would go away.
+  //console.log(file);
+  //console.log(this.form)
+
+  //FileReader() will allow you to read a file. it is a constructor so you would have to instantiate it 
+  const reader = new FileReader();
+
+  //execute a function when the dom is done loading a resource that was attached. this will get called when it's done reading a file
+  //this is an async code, which is why we have the callback, so when the reader class is instantitated, this function will get called as the callback function
+  reader.onload = () => {
+    //type casting, tell reader.result is a string so that it can be assigned to imagePreview which is a string. 
+    this.imagePreview = <string>reader.result;
+  }
+  //this tells reader to actually load the file. so the function above can kick off
+  reader.readAsDataURL(file);
+}
+
+
  //since adding directive two-way binding on the element use below syntax rather than above
  //no longer need to pass in the element individually since the directive will automatically update the value on each time this function is ran by whatever element
  //form: NGform we know what will enter in this function is a form of a ngForm directive object. So we have access to the elements inside that form
- onSavePost(form: NgForm) {
+ //after adding ReactiveFormsModule you do not have the form: NgForm being passed into this method.
+ //onSavePost(form: NgForm) {
+ onSavePost() {
     //alert('Post added!');
     //console.dir(postInput);
     //this.newPost = this.enteredValue;
@@ -102,9 +162,15 @@ export class PostCreateComponent implements OnInit {
     // };
     //new Version after adding Form tag and using directives ngForm
     //if any of the form fields were required or had minlegths which would cause an invalid form, enter here
-    if (form.invalid) {
-      return;
-    }
+
+    // if (form.invalid) {
+    //   return;
+    // }
+    //after adding ReactiveFormsModule 
+    //you no longer have just form. Except you have this.form
+    // if (this.form.invalid) {
+    //   return;
+    // }
     //whenever creating a post, show the isLoading spinner. do not need to reset it to false
     //because once you add a new post, the page goes to the main page anyway, which there it is defaulted to 
     //false so spinner will go away again
@@ -123,12 +189,14 @@ export class PostCreateComponent implements OnInit {
 
     //V3 after adding routing of adding and updating posts to this component use following code instaed of line above
     if (this.mode === 'create') {
-      this.postsService.addPost(form.value.title, form.value.content);
+      //add the image to this arguments 
+      this.postsService.addPost(this.form.value.title, this.form.value.content, this.form.value.image);//these are controls of the form. 
     } else {
-      this.postsService.updatePost(this.postId, form.value.title, form.value.content);
+      this.postsService.updatePost(this.postId, this.form.value.title, this.form.value.content, this.form.value.image);
     }
 
-    form.resetForm();
+    //form.resetForm();//no longer needed after adding ReactiveFormsModule
+    this.form.reset();//reactiveFormModule is just reset();
 
   }
 }
