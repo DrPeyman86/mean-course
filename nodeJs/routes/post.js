@@ -4,8 +4,8 @@ const Post = require('.././models/post')
 
 const router = express.Router();//call the Router() constructor
 
-//router does the same thing as app.get, but it's more clear understanding of having route in front of your 
-//method calls than app.get. 
+//router does the same thing as app.get, but it's more clear understanding of having route in front of your
+//method calls than app.get.
 
 //since this file will only get called when the URL starts with /api/posts, you can strip the "/api/posts" off
 //of every router.post() router.get() or anything else within this file
@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
     //destination expects those arguments. when multer tries to save a file it runs this function
     //need to call the callback to tell where you should store the file
     //first argument of callback is whether you detect an error. second is where it should be stored
-    //the path is relative of your server root directory. 
+    //the path is relative of your server root directory.
     destination: (req, file, callback) => {
         const isValid = MIME_TYPE_MAP[file.mimetype];//this will return either true or false if it finds the file.mimetype is inside of MIME_TYPE_MAP
         let error = new Error('Invalid mime type');
@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
             error = null;
         }
         callback(error, "nodeJs/images");
-    }, 
+    },
     filename: (req, file, callback)=>{
         const name = file.originalname.toLowerCase().split(' ').join('_');//originalname is a default property of what multer provides. and also .split(' ').join('_') to remove whitespace and replace with dash
         const ext = MIME_TYPE_MAP[file.mimetype];//get the extension. file.mimetype is default property of multer
@@ -37,9 +37,9 @@ const storage = multer.diskStorage({
     }
 });
 
-//.post() will run each function of every argument by order. so first it looks at the "" which is the route. 
-//second will run the multer(storage).single("image"): multer will extract a single file from client and it will try to find it on an "image" property in that request body 
-//need to send multer an object that has the key of storage and value of storage. this is the name of the const above. 
+//.post() will run each function of every argument by order. so first it looks at the "" which is the route.
+//second will run the multer(storage).single("image"): multer will extract a single file from client and it will try to find it on an "image" property in that request body
+//need to send multer an object that has the key of storage and value of storage. this is the name of the const above.
 //thrird will run the callback (req,res,next)
 router.post("",multer({storage: storage}).single("image"),(req,res, next)=>{
     //const post = req.body;
@@ -57,7 +57,7 @@ router.post("",multer({storage: storage}).single("image"),(req,res, next)=>{
         //201 means something was stored and was ok. 200 just means everytnhing was ok
         res.status(201).json({
         message: "post added successfully",
-        //postId: createdPost._id       
+        //postId: createdPost._id
         post: {
             /*id: createdPost._id,
             title: createdPost.title,
@@ -82,7 +82,7 @@ router.put('/:id',multer({storage: storage}).single("image"), (req,res,next)=>{
     //set the imagePath to default req.body.imagePath which is the string version in case the image was not updated in the edit menu.
     let imagePath = req.body.imagePath;
     //req.file would be undefined if we are submitting a string, so req.file would be false if no file is detected. if file was sent, req.file would be true
-    //and it would enter the if, so that we can set the imagePath accordingly. 
+    //and it would enter the if, so that we can set the imagePath accordingly.
     if(req.file) {
         const url = req.protocol + "://" + req.get("host");
         imagePath = url + "/images/" + req.file.filename;
@@ -92,14 +92,14 @@ router.put('/:id',multer({storage: storage}).single("image"), (req,res,next)=>{
     _id: req.body.id,//set the newly created Post to the same id as it was before
     title: req.body.title,
     content: req.body.content,
-    imagePath: imagePath   
+    imagePath: imagePath
     })
     console.log(post);
     //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
     Post.updateOne({_id: req.params.id}, post).then(result=>{
         //console.log(result);
         res.status(200).json({
-        message: 'Update Successful' 
+        message: 'Update Successful'
         })
     })
 })
@@ -113,7 +113,21 @@ router.get('', (req, res, next)=>{
 //   { id: "12152sfdsf", title: "Second server-side post", content: "This second coming from server"}
 // ];
 //console.log('here');
-Post.find()
+console.log(req.query);//this will hold the query param information, anything that comes afte the "?" sign in the URL.
+const pageSize = +req.query.pagesize;//a + sign in front of an string would turn it into a numeric type. If it is a numeric!
+const currentPage = +req.query.currentPage;
+//mongoose allows you to structure queries by chaining multple query methods which will narrow down your query
+//by default we want Post.find() where it finds all posts
+const postQuery = Post.find();
+//if pageSize and currentPage are passed through the request enter here
+if (pageSize && currentPage) {
+  //we want to manipulate the postQuery return here since we have pageSize and currentPage
+  postQuery
+  .skip(pageSize * (currentPage - 1))//.skip would skip a number defined in .skip() by the index of the items in the table/document. So pageSize if it's 10, and currentPage is 2. 2-1 would be 1. Multiply by 10 would be 10. So it would skip the first 10 items.
+  //if pageSize is 10 and page is 3. 3-1 = 2. Multiply 10 would be 20. So it would skip first 20 indexed items.
+  .limit(pageSize);//this would limit the amount of items returned. However, this still queries all items in a table first, then limits it. So may not be the best efficient way of limiting.
+}
+postQuery.find()
     .then((documents)=>{
     //console.log(documents);
     res.status(200).json({
@@ -137,7 +151,7 @@ Post.find()
 })
 
 //route to get the post info from the post edit/create page so that if the page was
-//reloaded on the edit page, it will render the post data and populate the fields without needing to 
+//reloaded on the edit page, it will render the post data and populate the fields without needing to
 //go back to the main page and clicking Edit button.
 router.get('/:id',(req,res,next)=>{
     Post.findById(req.params.id).then((post)=>{

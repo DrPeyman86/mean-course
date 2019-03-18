@@ -10,6 +10,10 @@ mat-spinner {
   margin: auto;
 }
 
+mag-paginator {
+  margin-top: 1rem;
+}
+
 .post-image {
   width: 30%;
 }
