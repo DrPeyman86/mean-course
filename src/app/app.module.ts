@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms'//this is the library needed to import to be able to use directives. not loaded by default
+import { ReactiveFormsModule, FormsModule } from '@angular/forms'//this is the library needed to import to be able to use directives. not loaded by default
 //the ReactiveFormsModule replaces normal FormsModule which is a template form method of handling form inputs and submissions.
 //ReactiveFrosmModule allows to define in typescript the form fields and validate reactively.
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,6 +26,8 @@ import { HeaderComponent } from './header/header.component';
 import { PostListComponent } from './posts/post-list/post-list.component';
 import { PostsService } from './posts/post.service';//you can add this service to the providers[] array in bottom. One of the methods of adding service to the angular app
 import { AppRoutingModule } from './app-routing.module';
+import { LoginComponent } from './auth/login/login.component';
+import { SignUpComponent } from './auth/signUp/signUp.component';
 //import the component you want to register first
 //after the module is started, angular will reguster these certain components
 //which are declared. It also imports BrowserModule which is a module for browser framework.
@@ -39,13 +41,16 @@ import { AppRoutingModule } from './app-routing.module';
     AppComponent,
     PostCreateComponent,
     HeaderComponent,
-    PostListComponent
+    PostListComponent,
+    LoginComponent,
+    SignUpComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,//name of the Router defined in app-routing.module.ts
     //FormsModule,//this was repalced by ReactiveFormsModule
     ReactiveFormsModule,
+    FormsModule,
     BrowserAnimationsModule,//add the FormsModule directives package inside here
     MatInputModule,
     MatCardModule,

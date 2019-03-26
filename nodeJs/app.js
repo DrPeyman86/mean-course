@@ -6,6 +6,7 @@ const path = require('path');
 
 //UP5HYhHj42q6bDNt//mongodb password
 const postsRoutes = require('./routes/post');
+const userRoutes = require('./routes/user');
 
 
 
@@ -16,7 +17,9 @@ const app = express();//create a new instance of app. the app can now be used af
 
 //connect will return a promise so you can use .then and .catch
 //the node-angular is the database you want this app to write to
-mongoose.connect("mongodb+srv://peyman:UP5HYhHj42q6bDNt@cluster0-lb4pq.mongodb.net/node-angular?retryWrites=true", {useNewUrlParser: true})
+//mongodb+srv://peyman:<password>@cluster1-lb4pq.mongodb.net/test?retryWrites=true
+//peyman:UP5HYhHj42q6bDNt
+mongoose.connect("mongodb+srv://peyman:UP5HYhHj42q6bDNt@cluster1-lb4pq.mongodb.net/node-angular?retryWrites=true", {useNewUrlParser: true})
 .then(()=>{
   console.log('Connected to database')
 })
@@ -26,9 +29,9 @@ mongoose.connect("mongodb+srv://peyman:UP5HYhHj42q6bDNt@cluster0-lb4pq.mongodb.n
 
 app.use(bodyParser.json());//use body-parser for all incoming requests parsing out json data
 app.use(bodyParser.urlencoded({extended: false}))//if you also want to parse urlencoded. extended false means to only allow default features when you are encoding
-//by default when you want to request a file from a folder stored in the backend will not be allowed. To allow a certain folder to be allowed to fetched from 
+//by default when you want to request a file from a folder stored in the backend will not be allowed. To allow a certain folder to be allowed to fetched from
 //client side, use this middleware
-//path just forwards this route from "/images" to "backened/images" since the client side would not know the exact path of backened code. 
+//path just forwards this route from "/images" to "backened/images" since the client side would not know the exact path of backened code.
 app.use("/images", express.static(path.join("nodeJs/images")));//if client is requesting a URL of the "/images" path, static() middlware allows this to be fetched.
 
 // app.use((req, res, next)=>{
@@ -51,6 +54,7 @@ app.use((req,res,next)=>{
 //.use() first argument will filter what URL you are calling and only send routes with the URL beginning
 //with whatever is in first argument to that routes object defined in 2nd argument
 app.use("/api/posts", postsRoutes);
+app.use("/api/user", userRoutes);//any path that starts with /api/user will get re-routed to the userRoutes file
 
 
 //replaced all routes below with routes/posts.js router method
@@ -128,7 +132,7 @@ app.use("/api/posts", postsRoutes);
 // })
 
 // //route to get the post info from the post edit/create page so that if the page was
-// //reloaded on the edit page, it will render the post data and populate the fields without needing to 
+// //reloaded on the edit page, it will render the post data and populate the fields without needing to
 // //go back to the main page and clicking Edit button.
 // app.get('/api/posts/:id',(req,res,next)=>{
 //   Post.findById(req.params.id).then((post)=>{

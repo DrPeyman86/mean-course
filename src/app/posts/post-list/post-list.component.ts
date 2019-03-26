@@ -24,10 +24,10 @@ export class PostListComponent implements OnInit, OnDestroy {
   //once you use the PostsService service, since you will use methods from that class to either get/set your objects, you do not need
   //the @Input decorator above.
 
-  totalPosts = 10;
+  totalPosts = 0;
   postsPerPage = 2;
   pageSizeOptions = [1,2,5,10];
-
+  currentPage = 1;
   private postsSub: Subscription;// postsSub is of type of Subscription
 
   //add the @Input decorated bind to the posts list
@@ -58,23 +58,36 @@ export class PostListComponent implements OnInit, OnDestroy {
     //and since we have the .subscribe subscription, you will be able to render the posts once they are there
     // this.posts =
     this.isLoading = true;
-    this.postsService.getPosts();
+    this.postsService.getPosts(this.postsPerPage, this.currentPage);//as default start on page 1
 
     //add a listener to that Subject
     //once you add Subscription, add the service to that Subscription so that it can be unsubcribed when ngOnDestory runs
     this.postsSub = this.postsService.getPostsUpdateListener()
-      .subscribe((posts: Post[])=>{
+    /*
+    .subscribe((posts: Post[])=>{
         //posts is what we are receiving from the next() method when adding posts
-        console.log('posts', this.posts);
+        //console.log('posts', this.posts);
         this.isLoading = false;
         this.posts = posts;
       });//.subscribe sets up a subscription which takes 3 arguments, a function() argument, an error callback, and a complete successfully callback
+      */
+      //V2 once the posts[] type changes to an object since adding the postCount property, do this instead of above code.
+      .subscribe((postData: {posts: Post[], postCount: number})=>{
+        this.isLoading = false;
+        this.posts = postData.posts;
+        this.totalPosts = postData.postCount;
+      });
+
   }
 
 
   onDelete(postId: string) {
     //console.log('posts 0:',postId)
-    this.postsService.deletePost(postId);
+    this.isLoading = true;
+    this.postsService.deletePost(postId).subscribe(()=>{
+      //V2 this is in tangent with changes made in postsService.ts. When the subscription was removed from there, need to subscribe to the return http request here.
+      this.postsService.getPosts(this.postsPerPage, this.currentPage);
+    });
   }
 
 
@@ -86,7 +99,11 @@ export class PostListComponent implements OnInit, OnDestroy {
   }
 
   onChangedPage(pageData: PageEvent) {
-    console.log(pageData);
+    this.isLoading = true;
+    this.currentPage = pageData.pageIndex + 1;
+    this.postsPerPage = pageData.pageSize;
+    //console.log(pageData);
+    this.postsService.getPosts(this.postsPerPage, this.currentPage );
   }
 
 }

@@ -119,6 +119,7 @@ const currentPage = +req.query.currentPage;
 //mongoose allows you to structure queries by chaining multple query methods which will narrow down your query
 //by default we want Post.find() where it finds all posts
 const postQuery = Post.find();
+let fetchedPosts;
 //if pageSize and currentPage are passed through the request enter here
 if (pageSize && currentPage) {
   //we want to manipulate the postQuery return here since we have pageSize and currentPage
@@ -127,6 +128,7 @@ if (pageSize && currentPage) {
   //if pageSize is 10 and page is 3. 3-1 = 2. Multiply 10 would be 20. So it would skip first 20 indexed items.
   .limit(pageSize);//this would limit the amount of items returned. However, this still queries all items in a table first, then limits it. So may not be the best efficient way of limiting.
 }
+/*
 postQuery.find()
     .then((documents)=>{
     //console.log(documents);
@@ -135,7 +137,19 @@ postQuery.find()
         posts: documents
     });
 });//will return everything under that model
-
+*/
+//V2 - to return the count before retuning the data/documents. chain .then() blocks to get the count as well
+postQuery.then((documents)=>{
+  fetchedPosts = documents;//return the document requested. you would initialize a variable outside the .then() function so that this variable can be used outside of this scope of function
+  return Post.countDocuments()//return the count of everything that is in the Post collection
+})//return Post.count() will return a promise, so you can just chain another .then() block
+.then((count)=>{
+  res.status(200).json({
+    message: "Posts fetches successfully",
+    posts: fetchedPosts,
+    maxPosts: count
+  });
+})
 // Posts.findAll().then((posts)=>{
 //   res.status(200).json({
 //     message: "Posts fetched success",

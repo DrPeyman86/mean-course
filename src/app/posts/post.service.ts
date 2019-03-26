@@ -39,14 +39,17 @@ export class PostsService {
   //reference type is
   //you do
   private posts: Post[] = [];//Post model is an array. private makes it a private property cannot be access from outside this class
-  private postsUpdated = new Subject<Post[]>();//send the Post type array to the Subject generic type
+  //private postsUpdated = new Subject<Post[]>();//send the Post type array to the Subject generic type
+  //V2 = after adding maxPosts as enhancement, need to modify the Post model, so from above line to below line
+  private postsUpdated = new Subject<{posts: Post[], postCount: number}>();//the new postsUpdated subject is now an object rather than of type Post[] model
+
 
 
   //set the router property which is of type Router from angular
   constructor(private http: HttpClient, private router: Router) {}//inject the HttpClient to this service. Bind a private HttpClient type to the property named http or whatever you wanted
 
   //return the posts if they call this method
-  getPosts() {
+  getPosts(postPerPage: number, currentPage: number) {
     //Primitives????
     //you do not want to return the original posts array because arrays and objects in JS and typescript are reference types
     //reference types are types where if you copy it, you don't really copy it. the object in memory will stay the same. you just copied the address
@@ -64,28 +67,36 @@ export class PostsService {
     //because why would you want to make a request to something if you are not interested in what it sends back.
     //in a http subscription, you do not have to .unsubscribe() something on ngOnDestroy() for example. When other requests are made, angular will automatically unsubscribe to what was received previously and so on.
     //.get() is a generic type function. meaning you can specify what type of data you expect to get back
+    const queryParams = `?pagesize=${postPerPage}&currentPage=${currentPage}`;
     this.http
-      .get<{message: string, posts: any}>(//post type is no longer Post[] because posts coming from backend is with an "underscore" in front of id...so change to any for now.
-        'http://localhost:3000/api/posts'
+      .get<{message: string, posts: any, maxPosts: number}>(//post type is no longer Post[] because posts coming from backend is with an "underscore" in front of id...so change to any for now.
+        'http://localhost:3000/api/posts' + queryParams
         )
       //.pipe a method that accepts certain observable operators where you can manipuate the data coming in from the http request before the data is handled in the subscription
        //map is an observable operator method expects an object/argument that is the object that comes back from the observables stream. so in .get() request, it expects that returned result
       .pipe(map((postData)=>{
         //map takes an array and can replace all properties with some other property and return it as a new array. .pipe() will also return an Observable so the .subscribe can still subscribe to it
-        return postData.posts.map(post=> {
-          //every element called "post" here will be retuned as a new object defined below so that the properties of that object matches with the Post[] array defined.
-          return {
-            title: post.title,
-            content: post.content,
-            id: post._id,//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
-            imagePath: post.imagePath
-          };
-        });
+        //return an object back to where this function was called
+        return {
+            posts: postData.posts.map(post => {
+            //every element called "post" here will be retuned as a new object defined below so that the properties of that object matches with the Post[] array defined.
+            return {
+              title: post.title,
+              content: post.content,
+              id: post._id,//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
+              imagePath: post.imagePath
+            };
+          }),
+          maxPosts: postData.maxPosts
+        };
       }))//place a pipe to manipulate the data before the .subscribe chain so that you may want to rename some fields to match with what's in front-end. like "_id" to "id". pipe() is an obserable method that accepts certain operators
-      .subscribe((transformedPost)=>{
+      .subscribe((transformedPostData)=>{
         //postData is the response of that request. could call it whatever you want. the first argument in .subscribe is the response
-        this.posts = transformedPost;//set this.posts to whatever is coming in from the backend code
-        this.postsUpdated.next([...this.posts]);
+        this.posts = transformedPostData.posts;//set this.posts to whatever is coming in from the backend code
+        this.postsUpdated.next({
+            posts: [...this.posts],
+            postCount: transformedPostData.maxPosts
+        });
       });
 
   }
@@ -106,13 +117,13 @@ export class PostsService {
     return this.http.get<{_id: string, title: string, content: string, imagePath: string}>(
       'http://localhost:3000/api/posts/' + id
       );
-  
+
   }
 
   //method to call by components to add a post to the posts array
   addPost(title: string, content: string, image: File) {
     //const post: Post = {id: null, title: title, content: content};//issue here was when we set id: null and immediately send this id of null back to front-end, if we wanted to delete that post it wouldn't have a id value. so that
-    
+
     //JSON CAN"T INCLUDE A FILE. When you want to send files to backened. Need to send Form Data instead of JSON
     const postData = new FormData();//FormData is a javascript objct that provides text values and blob data(blob means file values)
     postData.append("title", title);
@@ -130,17 +141,28 @@ export class PostsService {
         //console.log(responseData.message);
         //if you have these lines inside the .subscribe() it will only add the newly post if and only if the post was added to the server
         //successfully. Because the .subscribe() will only run if the backend code returns no errors.
-        
+
         //const postId = responseData.postId;
         //post.id = postId;//update the post object defined above where the id was initially null...to update its "id" property to the "id" returned from backend so that the front-end will know of its value the first time without needing to reload page.
-        
+
         //after adding File Feature
         //need to save the post after the backend returns no errors
-        const post: Post = {id: responseData.post.id, title: title, content: content, imagePath: responseData.post.imagePath};//we do not get the image yet back from backend, TODO TODO TODO
+        //Do not need anymore since we have the router.naviagte()
+        /*
+        const post: Post = {
+          id: responseData.post.id,
+          title: title,
+          content: content,
+          imagePath: responseData.post.imagePath
+        };//we do not get the image yet back from backend, TODO TODO TODO
 
-        
+
         this.posts.push(post);//push the new post to the array post
         this.postsUpdated.next([...this.posts]);
+        */
+        //V2 - since in post-list-component.ts ngOnInit() .getPosts() is already called, we don't need the above codes to refresh the this.postsUpdated subject because .getPosts() will do that anyway when pages are refreshed.
+        //just need the this.router.navigate() since that will re-rouse to main page where ngOnInit() will call .getPosts() and refresh data anyway.
+
         this.router.navigate(["/"])//pass as argument an array of segments. send the page back to the main page since the main page is just "/"
       })
     //if these 2 lines are outside the .subscribe right above, it is called optimistic updating the front-end because you are adding the
@@ -164,9 +186,9 @@ export class PostsService {
       postData.append("title", title);
       postData.append("content", content);
       //since in the arguments you have Image can be either an image or string, you have use generic types <File> to say that this image object is actually going to be a File
-      //since we already know it will be a file since the IF above. 
+      //since we already know it will be a file since the IF above.
       postData.append("image", <File>image, title)//this image property is exactly what the backend is looking for. so name them the same. second argument is the file. third is the title of the file you want
-    
+
     } else {
       postData = { id: id, title: title, content: content, imagePath: image };
     }
@@ -174,11 +196,15 @@ export class PostsService {
       .subscribe((response)=>{
         //console.log(response);
         //without refreshing the page, want to be able to update the front-end with the newly updated post data
+
+        //Do not need anymore since we have the router.naviagte()
+        /*
         const updatedPosts = [...this.posts]//first create a new array of exactly the same array
-        const oldPostIndex = updatedPosts.findIndex(p=>p.id === id)//findIndex() takes a function that will return where some logic is defined. here we want to 
+        const oldPostIndex = updatedPosts.findIndex(p=>p.id === id)//findIndex() takes a function that will return where some logic is defined. here we want to
         //find the p.id in the updatedPosts array that equals the post.id value that was updated so that we can update the data on that post
-        
+
         //define the post that was edited so that it can be updated below
+
         const post: Post = {
           id: id,
           title: title,
@@ -191,14 +217,23 @@ export class PostsService {
         this.posts = updatedPosts;//reset the original posts array property to the updatedPosts defined
         //tell the app with this event by calling .next() and sending postsUpdated which is a subject
         this.postsUpdated.next([...this.posts]);//
+        */
+        //V2 - since in post-list-component.ts ngOnInit() .getPosts() is already called, we don't need the above codes to refresh the this.postsUpdated subject because .getPosts() will do that anyway when pages are refreshed.
+        //just need the this.router.navigate() since that will re-rouse to main page where ngOnInit() will call .getPosts() and refresh data anyway.
+
         this.router.navigate(["/"])//send the page back to the main page since the main page is just "/"
       })
   };
 
   deletePost(postId: string) {
     //console.log('postId:',postId);
-    this.http.delete("http://localhost:3000/api/posts/" + postId)
-      .subscribe(()=>{
+    //V2 - since in post-list-component.ts ngOnInit() .getPosts() is already called, we don't need the above codes to refresh the this.postsUpdated subject because .getPosts() will do that anyway when pages are refreshed.
+    //just need the this.router.navigate() since that will re-rouse to main page where ngOnInit() will call .getPosts() and refresh data anyway.
+    //For delete is different since we do need to re-fetch the list of items after something is deleted.
+    //But rather than .subscribing here, simply return the http request back to the component where this method was called and subscribe to it there.
+    return this.http.delete("http://localhost:3000/api/posts/" + postId)//simply return this http call and subscribe to it where it was called rather than subscribing to it here
+
+      /*.subscribe(()=>{
         console.log('deleted');
         //create a new updatedPosts array after deleting the one that was requested.
         //filter returns a subset of the array we use based on what value you pass in the filter. filter loops through the array of posts or whatever array you provide.
@@ -209,7 +244,10 @@ export class PostsService {
         })
         this.posts = updatedPosts;//set the array Posts to the new updated posts array after deletions
         this.postsUpdated.next([...this.posts]);
-      })
+
+
+      })*/
+
   }
 
 
