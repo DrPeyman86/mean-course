@@ -4,7 +4,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms'//this is the l
 //the ReactiveFormsModule replaces normal FormsModule which is a template form method of handling form inputs and submissions.
 //ReactiveFrosmModule allows to define in typescript the form fields and validate reactively.
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientModule } from '@angular/common/http';//this module is needed to send/recieve http requests from a backend code
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';//this module is needed to send/recieve http requests from a backend code
 import {
   MatInputModule,
   MatCardModule,
@@ -28,6 +28,7 @@ import { PostsService } from './posts/post.service';//you can add this service t
 import { AppRoutingModule } from './app-routing.module';
 import { LoginComponent } from './auth/login/login.component';
 import { SignUpComponent } from './auth/signUp/signUp.component';
+import { AuthInterceptor } from './auth/auth-interceptor';
 //import the component you want to register first
 //after the module is started, angular will reguster these certain components
 //which are declared. It also imports BrowserModule which is a module for browser framework.
@@ -61,7 +62,15 @@ import { SignUpComponent } from './auth/signUp/signUp.component';
     MatProgressSpinnerModule,
     MatPaginatorModule
   ],
-  providers: [],
+  //add Interceptors here in the providers array as an object. 
+  //provide: is needed to tell Angular that 
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS, //provide a token HTTP_INTERCEPTORS which is an identifier by the http package which Angular will look for, the Http client, for this token/identifier we want to provide a new value
+      useClass: AuthInterceptor, //useClass is what we want to use instead as the token/identifier for the Http Client. so set the interceptor to where the interceptor is located. 
+      multi: true//multi set to true means that if there are other default interceptors, do not eliminate them from the app, just add this one we added to the list of interceptors
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

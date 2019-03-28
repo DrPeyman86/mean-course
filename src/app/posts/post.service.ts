@@ -43,6 +43,13 @@ export class PostsService {
   //V2 = after adding maxPosts as enhancement, need to modify the Post model, so from above line to below line
   private postsUpdated = new Subject<{posts: Post[], postCount: number}>();//the new postsUpdated subject is now an object rather than of type Post[] model
 
+  //V3 V3 V3 - adding token to each one of these requests
+  //the token comes from the auth.services.ts. 
+  //we could inject the auth.service.ts in this service and then call the getToken() method from auth.service.ts to get the token on every method we have here and then adding a "Header" to all 
+  //outgoing Http requests. "Header" is usually where tokens are stored
+  //a better way of doing this is using what is called an "interceptor" for httpclient. interceptors on the HttpClient are just functions that will automatically run on every single outgoing
+  //http request. So like a middleware in NodeJs where it intercepts incoming requests, interceptors in angular intercept all outgoing requests and can do certain things. for example attach a 
+  //token to the "Header" property
 
 
   //set the router property which is of type Router from angular

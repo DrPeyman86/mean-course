@@ -44,11 +44,11 @@ app.use("/images", express.static(path.join("nodeJs/images")));//if client is re
 app.use((req,res,next)=>{
   res.setHeader('Access-Control-Allow-Origin', "*");//which domains are able to access the resources from backend
   //this will allow requests to be made with these special headers. The requests do not need to include these headers, but they can. and no other special header will be allowed
-  res.setHeader("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept")
+  res.setHeader("Access-Control-Allow-Headers","Origin, X-Requested-With, Content-Type, Accept, Authorization")
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");//define what methods can be sent to the backend app. OPTIONS is important because by default it sends OPTIONS method along with any other
   //method, but if you explicity define which methods can be sent like GET, POST... and then not include "OPTIONS" the app will break.
   next();//should be able to continue
-})
+}) 
 
 //once you have router in app, just do this and the app will relay the routes to that file
 //.use() first argument will filter what URL you are calling and only send routes with the URL beginning
