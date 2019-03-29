@@ -10,7 +10,7 @@
       <img [src]="post.imagePath" [alt]="post.title">
     </div>
     <p>{{ post.content }}</p>
-    <mat-action-row>
+    <mat-action-row *ngIf="userIsAuthenticated">
       <!--we want to Bind to the property of routerLink which is also called routerLink element so that we can send an array of the URL
          we want to define by segments. So first position would be the path. after would be any arguments you want to send along with that URL-->
       <a mat-button color="primary" [routerLink]="['/edit', post.id]">EDIT</a>

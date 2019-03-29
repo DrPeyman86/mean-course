@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs'
 import { Post } from '../post.model';
 import { PostsService } from '../post.service';
 import { PageEvent } from '@angular/material';
+import { AuthService } from 'src/app/auth/auth.services';
 
 @Component({
   selector: 'app-post-list',
@@ -28,7 +29,9 @@ export class PostListComponent implements OnInit, OnDestroy {
   postsPerPage = 2;
   pageSizeOptions = [1,2,5,10];
   currentPage = 1;
+  userIsAuthenticated = false;
   private postsSub: Subscription;// postsSub is of type of Subscription
+  private authStatusSub: Subscription;
 
   //add the @Input decorated bind to the posts list
   //Post[] creates that interface defined so that posts coming into this component will adhere to the Post interface defined in post.model.ts
@@ -39,7 +42,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   //in constructor you can expect arguments, but since Angular is the one creating you the instance of this component, Angular has to give you these
   //arguments with "dependency injection" which angular is able to find out what you want and give you what you wanted
   //postsService: is the service you want to have. PostService is the type you are giving Angular a hint about what Angular should give you
-  constructor(public postsService: PostsService) {
+  constructor(public postsService: PostsService, public authService: AuthService) {
     //this.postsService = postsService;
   }
   //or you can omit the above few lines with below.
@@ -49,6 +52,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   //ngOninit is a life cycle hook angular provides where the method will automatically be called every time the component is initialized.
   //so every time a post is created and is sent into post-list, this method will run
   ngOnInit() {
+    console.log('here in post-list');
     //set the posts property in this component by calling .getPosts() method of the postsservice service which gets the posts
 
     // this.posts = this.postsService.getPosts();
@@ -60,6 +64,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.postsService.getPosts(this.postsPerPage, this.currentPage);//as default start on page 1
 
+    //V3 V3 V3 - add new subscription to store whether user is authenticated
     //add a listener to that Subject
     //once you add Subscription, add the service to that Subscription so that it can be unsubcribed when ngOnDestory runs
     this.postsSub = this.postsService.getPostsUpdateListener()
@@ -77,6 +82,14 @@ export class PostListComponent implements OnInit, OnDestroy {
         this.posts = postData.posts;
         this.totalPosts = postData.postCount;
       });
+
+      //V3 V3 V3 - add new subscription to store whether user is authenticated
+      this.userIsAuthenticated = this.authService.getIsAuth();
+
+      this.authStatusSub = this.authService.getAuthStatusListener().subscribe((isAuthenticated)=>{
+        console.log('isAuthenticated ', isAuthenticated);
+        this.userIsAuthenticated = isAuthenticated;//set the userIsAuthenticated flag in this component to whatever isAuthenticated is that comes back from authService.
+      })
 
   }
 
@@ -96,6 +109,7 @@ export class PostListComponent implements OnInit, OnDestroy {
     //by default .subcribe() will create a subscription and store in memory. if the page is gone from DOM the subscription will still exist
     //which will keep the memory. to clear the subscription, we call ngOnDestory and remove the subscription
     this.postsSub.unsubscribe();
+    this.authStatusSub.unsubscribe();
   }
 
   onChangedPage(pageData: PageEvent) {

@@ -56,7 +56,7 @@ router.post('/login', (req, res, next)=>{
   User.findOne({ email: req.body.email })
     .then((user)=>{
       //if user is found, then a user exists
-      
+
       if (!user) {
         return res.status(401).json({
           message: 'User not found'
@@ -76,12 +76,13 @@ router.post('/login', (req, res, next)=>{
       }
       //enteres here if the user was authenticated so need to create a token that is hashed
       //use jwt.sign to create either a string or object that would be sent back to the client. you can store the email, maybe not the password since its sensitive, even though it is encrypted, not good idea.
-      //and the userId so that we can identify the userid in the client. 
-      //second argumnet is the secret passphrase, called SALTING. 
-      //expiresIn is an option that you can send like 1h for 1 hour which means that token will expire in 1 hour. 
+      //and the userId so that we can identify the userid in the client.
+      //second argumnet is the secret passphrase, called SALTING.
+      //expiresIn is an option that you can send like 1h for 1 hour which means that token will expire in 1 hour.
       const token = jwt.sign({email: fetchedUser.email, userId: fetchedUser._id}, 'peymancssh', {expiresIn: "1h"})
       res.status(200).json({
-        token: token 
+        token: token,
+        expiresIn: 3600
       })
     })
     .catch(err=>{
