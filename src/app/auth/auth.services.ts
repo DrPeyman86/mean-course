@@ -76,7 +76,7 @@ export class AuthService {
     this.isAuthenticated = false;
     this.authStatusListener.next(false)//send the new information to any listener that is interested in knowing whether a user is authenticated or not. in this case, false, means that user is not authenticated anymore.
     //console.log(this.tokenTimer);
-    clearTimeout(this.tokenTimer)//clearTimeout will
+    clearTimeout(this.tokenTimer)//clearTimeout will clear that timer unique ID from the local memory. 
     this.router.navigate(['/']);
   }
 
