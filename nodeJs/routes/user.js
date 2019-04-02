@@ -79,6 +79,7 @@ router.post('/login', (req, res, next)=>{
       //and the userId so that we can identify the userid in the client.
       //second argumnet is the secret passphrase, called SALTING.
       //expiresIn is an option that you can send like 1h for 1 hour which means that token will expire in 1 hour.
+      //v4 v4 v4 -- since the jwt.sign method created an object with email, userId property, we know when we do jwt.verify() we can retrieve them back as regular strings, do this in check-auth.js
       const token = jwt.sign({email: fetchedUser.email, userId: fetchedUser._id}, 'peymancssh', {expiresIn: "1h"})
       res.status(200).json({
         token: token,

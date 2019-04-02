@@ -52,10 +52,15 @@ router.post("",
         const post = new Post({
             title: req.body.title,
             content: req.body.content,
-            imagePath: url + "/images/" + req.file.filename//add the imagepath to the Post model
+            imagePath: url + "/images/" + req.file.filename,//add the imagepath to the Post model
+            creator: req.userData.userId
         })//the Post model gives a constructor function which we can use to instantiate that object
         //console.log(post);
         //option 2 - of the issue we ran into where the id was not provided when we added new post. you called a .then() after the .save() to get the createdPosts id field and send that along with the message object back to front-end
+
+        //console.log(req.userData);
+        //return res.status(200).json({});
+
         post.save().then((createdPost)=>{
             //console.log(results);
             //201 means something was stored and was ok. 200 just means everytnhing was ok
@@ -81,7 +86,7 @@ router.post("",
 //patch to only update an existing resource with new values
 router.put('/:id',
     checkAuth,//add the middleware authentication before any other middleware below so that it will authenticate first before express tries to do anything else
-    multer({storage: storage}).single("image"), 
+    multer({storage: storage}).single("image"),
     (req,res,next)=>{
         //since we are doing .put() create a new instance of the Post() model. so that technically the update process creates a whole new record
         //console.log(req.file);
@@ -103,11 +108,23 @@ router.put('/:id',
         })
         //console.log(post);
         //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data
-        Post.updateOne({_id: req.params.id}, post).then(result=>{
+        //V4 V4 V4 -- to not allow a user to update a post that is not assigned as the creator, you can add the criteria of the creator to the updateOne() method.
+        //so updateOne will update only if it finds that _id having a creator ID that was passed in from the client.
+        //we get the req.userData.userId from the checkAuth middleware since that adds a new property to the req object so we can use it here.
+        Post.updateOne({_id: req.params.id, creator: req.userData.userId}, post).then(result=>{
             //console.log(result);
-            res.status(200).json({
-            message: 'Update Successful'
-        })
+            //V4 V4 V4 -- result.nModified returns from mongoose when you try to updateOne(). there it gives a property nModified which tells us how many records weere updated. That is what we will use to determine if
+            //an update took place.
+            if(result.nModified > 0 ) {
+                res.status(200).json({
+                Message: 'Update Successful'
+              })
+            } else {
+                res.status(401).json({
+                message: 'User does not have access to update this post'
+              })
+            }
+
     })
 })
 
@@ -186,12 +203,20 @@ router.get('/:id',(req,res,next)=>{
 
 router.delete(`/:id`,checkAuth,(req,res,next)=>{
 //console.log(req.params.id)//req.params gives you access to the params available in the url. like "id" in this case
-    Post.deleteOne({_id:req.params.id})
+    //V4 V4 V4 -- want to add authorization to deletion as well same as post() where only user who created the post can delete it.
+    Post.deleteOne({_id:req.params.id, creator: req.userData.userId })
         .then((result)=>{
         //console.log(result);
-        res.status(200).json({
-            message: "post deleted"
+        //for deletion, there is not nModified in the object that comes back from deleteOne(). so use "n". You could just use "n" for the update() also to keep consistent with each other.
+        if(result.n > 0 ) {
+          res.status(200).json({
+          Message: 'Delete Successful'
         })
+        } else {
+            res.status(401).json({
+            message: 'User does not have access to delete this post'
+          })
+        }
     });//delete the id that matches the _id in the table
 
 })

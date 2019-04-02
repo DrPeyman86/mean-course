@@ -44,11 +44,11 @@ export class PostsService {
   private postsUpdated = new Subject<{posts: Post[], postCount: number}>();//the new postsUpdated subject is now an object rather than of type Post[] model
 
   //V3 V3 V3 - adding token to each one of these requests
-  //the token comes from the auth.services.ts. 
-  //we could inject the auth.service.ts in this service and then call the getToken() method from auth.service.ts to get the token on every method we have here and then adding a "Header" to all 
+  //the token comes from the auth.services.ts.
+  //we could inject the auth.service.ts in this service and then call the getToken() method from auth.service.ts to get the token on every method we have here and then adding a "Header" to all
   //outgoing Http requests. "Header" is usually where tokens are stored
   //a better way of doing this is using what is called an "interceptor" for httpclient. interceptors on the HttpClient are just functions that will automatically run on every single outgoing
-  //http request. So like a middleware in NodeJs where it intercepts incoming requests, interceptors in angular intercept all outgoing requests and can do certain things. for example attach a 
+  //http request. So like a middleware in NodeJs where it intercepts incoming requests, interceptors in angular intercept all outgoing requests and can do certain things. for example attach a
   //token to the "Header" property
 
 
@@ -91,7 +91,8 @@ export class PostsService {
               title: post.title,
               content: post.content,
               id: post._id,//_id is what we get from backened, so we need to set that to just "id" since in frontend we are using id.
-              imagePath: post.imagePath
+              imagePath: post.imagePath,
+              creator: post.creator//V4 v4 v4 --should be getting this creator now from the server.
             };
           }),
           maxPosts: postData.maxPosts
@@ -99,6 +100,9 @@ export class PostsService {
       }))//place a pipe to manipulate the data before the .subscribe chain so that you may want to rename some fields to match with what's in front-end. like "_id" to "id". pipe() is an obserable method that accepts certain operators
       .subscribe((transformedPostData)=>{
         //postData is the response of that request. could call it whatever you want. the first argument in .subscribe is the response
+        //v4 v4 v4 -- adding authorization.
+        //can see the new object that comes back which has creator UserId in it
+        //console.log(transformedPostData);
         this.posts = transformedPostData.posts;//set this.posts to whatever is coming in from the backend code
         this.postsUpdated.next({
             posts: [...this.posts],
