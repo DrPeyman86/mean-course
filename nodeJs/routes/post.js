@@ -104,7 +104,9 @@ router.put('/:id',
             _id: req.body.id,//set the newly created Post to the same id as it was before
             title: req.body.title,
             content: req.body.content,
-            imagePath: imagePath
+            imagePath: imagePath,
+            //V4 V4 V4 -- authorizaton --get the creatorID from the checkAuth middleware rather than getting this from the front-end because hackers from front-end could manipulate this value
+            creator: req.userData.userId
         })
         //console.log(post);
         //use the updateOne method to give it which _id you want to update. Second argument will replace that first record with second arguments data

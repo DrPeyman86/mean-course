@@ -30,6 +30,7 @@ export class PostListComponent implements OnInit, OnDestroy {
   pageSizeOptions = [1,2,5,10];
   currentPage = 1;
   userIsAuthenticated = false;
+  userId: string;
   private postsSub: Subscription;// postsSub is of type of Subscription
   private authStatusSub: Subscription;
 
@@ -64,6 +65,9 @@ export class PostListComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.postsService.getPosts(this.postsPerPage, this.currentPage);//as default start on page 1
 
+    //V4 V4 V4 -- add the userId in this component so that it can be used whether a user should have access to edit/delete a post
+    this.userId = this.authService.getUserId();
+
     //V3 V3 V3 - add new subscription to store whether user is authenticated
     //add a listener to that Subject
     //once you add Subscription, add the service to that Subscription so that it can be unsubcribed when ngOnDestory runs
@@ -89,6 +93,11 @@ export class PostListComponent implements OnInit, OnDestroy {
       this.authStatusSub = this.authService.getAuthStatusListener().subscribe((isAuthenticated)=>{
         console.log('isAuthenticated ', isAuthenticated);
         this.userIsAuthenticated = isAuthenticated;//set the userIsAuthenticated flag in this component to whatever isAuthenticated is that comes back from authService.
+
+        //V4 V4 V4 -- add the userId in this component so that it can be used whether a user should have access to edit/delete a post
+        //needed here inside the .subscribe() method after .getAuthStatusListener() runs so that if the token expires when user is still logged in or userId changes due 
+        //to authStatus, the userId will be reflected of the change. 
+        this.userId = this.authService.getUserId();
       })
 
   }

@@ -104,6 +104,7 @@ export class PostsService {
         //can see the new object that comes back which has creator UserId in it
         //console.log(transformedPostData);
         this.posts = transformedPostData.posts;//set this.posts to whatever is coming in from the backend code
+        //V4 V4 V4 -- after adding the creator property to the Post[] model, the creator will be available on page where the Post[] is rendered. so you can use it. 
         this.postsUpdated.next({
             posts: [...this.posts],
             postCount: transformedPostData.maxPosts
@@ -125,7 +126,8 @@ export class PostsService {
     //V2 - to add ability to refresh the edit/create page so that the posts being edited will populate back
     //this.http.get already returns an observable, so whereever this method is being called, you can just subscribe to it
     //add the imagePath because you expect it returned as the backend
-    return this.http.get<{_id: string, title: string, content: string, imagePath: string}>(
+    //V4 v4 v4 --authorization - add the creator property to the object to send back when fetching posts
+    return this.http.get<{_id: string, title: string, content: string, imagePath: string, creator: string}>(
       'http://localhost:3000/api/posts/' + id
       );
 
@@ -201,7 +203,10 @@ export class PostsService {
       postData.append("image", <File>image, title)//this image property is exactly what the backend is looking for. so name them the same. second argument is the file. third is the title of the file you want
 
     } else {
-      postData = { id: id, title: title, content: content, imagePath: image };
+      //V4 V4 V4 -- authorization -- after adding the creator here since it's needed because we added to the Post[] model, do not set the creator to whatever the creator UserId is from the client
+      //because that would open up security issue where a hacker could set the creator userId to whatever and send that back along with the update request, which the backend will successfully apply.
+      //rather verify the creator in the backend 
+      postData = { id: id, title: title, content: content, imagePath: image, creator: null };
     }
     this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, postData)//send the id along with the URL. 2nd argument is the payload you are sending to backend
       .subscribe((response)=>{

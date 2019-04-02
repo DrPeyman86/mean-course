@@ -83,7 +83,8 @@ router.post('/login', (req, res, next)=>{
       const token = jwt.sign({email: fetchedUser.email, userId: fetchedUser._id}, 'peymancssh', {expiresIn: "1h"})
       res.status(200).json({
         token: token,
-        expiresIn: 3600
+        expiresIn: 3600,
+        userId: fetchedUser._id//V4 V4 V4 -- pass the userId back to the front end after the login so that the userId can be used for stricting access to buttons (edit,delete);
       })
     })
     .catch(err=>{

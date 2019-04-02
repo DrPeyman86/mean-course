@@ -70,7 +70,9 @@ export class PostCreateComponent implements OnInit {
           this.post = {id: postData._id,
             title: postData.title,
             content: postData.content,
-            imagePath: postData.imagePath//once you add imagePath to the return object of .getPost() in postsServices.ts
+            imagePath: postData.imagePath,//once you add imagePath to the return object of .getPost() in postsServices.ts
+            //V4 V4 V4 -- when fetching a post - set the creator userId as part of the object. also send this back from post.services.ts from the .getPost()
+            creator: postData.creator
           };
           //this.postId = postData._id;
           //this.title = postData.title;
