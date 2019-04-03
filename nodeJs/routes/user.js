@@ -25,7 +25,12 @@ router.post("/signup", (req, res, next)=>{
         })
         .catch(err=>{
           res.status(500).json({
-            error: err
+            //error: {
+              //V5 V5 V5 - error handling -- for the error-interceptor to correctly pick up the correct object property,
+              //just send back an object with a message property when an error occurs and the error.intercept.ts will pick up the 
+              //value of the message and display it in the dialog
+              message: 'Invalid Authentication Credentials!'
+            //}
           })
         })
     })

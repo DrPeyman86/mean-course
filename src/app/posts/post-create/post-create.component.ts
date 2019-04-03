@@ -1,11 +1,13 @@
 //import the Component object from angular/core files
-import { Component, EventEmitter, Output, OnInit} from '@angular/core';//Output object is for emitting events outside the current component
+import { Component, EventEmitter, Output, OnInit, OnDestroy} from '@angular/core';//Output object is for emitting events outside the current component
 
 import { Post } from '../post.model';
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { PostsService } from '../post.service'
 import { ActivatedRoute, ParamMap } from '@angular/router';//the ActivatedRoute gives us some information provided by angular of what the active route is that this component is being rendered to
 import { mimeType } from '../post-create/mime-type.validator'//import the validator 
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.services';
 
 //the @Component is a decorator angular understands. @ sign and what follows angular will understand if its a keyword
 //at minimum @Component decorator requires a selector and templateUrl
@@ -19,7 +21,7 @@ import { mimeType } from '../post-create/mime-type.validator'//import the valida
   styleUrls: ['./post-create.component.css']
 })
 
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
   enteredContent = '';
   enteredTitle = '';
   private mode = 'create'//by default set this component as a create compponent
@@ -30,12 +32,23 @@ export class PostCreateComponent implements OnInit {
   private isLoading = false;
   form: FormGroup; //need to now define the form programmatically. Need to store it in form of type FormGroup. FormGroup is a top level of Form. 
   imagePreview: string;
+  private authStatusListener: Subscription;
 
-  constructor(public postsService: PostsService, public route: ActivatedRoute){};//when component is initialized, run the constructor and get and set postsService
+
+  constructor(public postsService: PostsService, public route: ActivatedRoute, private authService: AuthService){};//when component is initialized, run the constructor and get and set postsService
   //when the component is initialized, the ActivatedRoute type binded to the property called route provides some information as to the route we are currently on
   //property from the PostsService service
 
   ngOnInit() {
+    //V5 V5 V5 -- error handling
+    //add the authStatusListener to this component so that whenever the status of the user changes, we know either they were logged out or logged in,
+    //in which case we know nothing should be loaded after that fact, so we want to remove the spinner from the post-create-component if it's spinning
+    this.authStatusListener = this.authService
+    .getAuthStatusListener()
+    .subscribe(authStatus=>{
+      this.isLoading = false;
+    })
+    
     //this is how you would define a form with options on how to define a form field with validations, default values, etc. 
     //formControl first argument is the default value of the field you are defining. second argument can be used for setting validations, options. 
     this.form = new FormGroup({
@@ -200,5 +213,9 @@ onImagePicked(event: Event) {
     //form.resetForm();//no longer needed after adding ReactiveFormsModule
     this.form.reset();//reactiveFormModule is just reset();
 
+  }
+  //V5 V5 V5 -- error handling
+  ngOnDestroy() {
+    this.authStatusListener.unsubscribe();//unscubscribe to the subscription once this component is destructed. so that it frees up memory
   }
 }

@@ -12,7 +12,8 @@ import {
   MatToolbarModule,
   MatExpansionModule,
   MatProgressSpinnerModule,
-  MatPaginatorModule
+  MatPaginatorModule,
+  MatDialogModule
 } from '@angular/material';
 
 //Angular is based on creating components for each different part of the page.
@@ -29,6 +30,8 @@ import { AppRoutingModule } from './app-routing.module';
 import { LoginComponent } from './auth/login/login.component';
 import { SignUpComponent } from './auth/signUp/signUp.component';
 import { AuthInterceptor } from './auth/auth-interceptor';
+import { ErrorInterceptor } from './error-interceptor';
+import { ErrorComponent } from './error/error.component';
 //import the component you want to register first
 //after the module is started, angular will reguster these certain components
 //which are declared. It also imports BrowserModule which is a module for browser framework.
@@ -44,7 +47,8 @@ import { AuthInterceptor } from './auth/auth-interceptor';
     HeaderComponent,
     PostListComponent,
     LoginComponent,
-    SignUpComponent
+    SignUpComponent,
+    ErrorComponent
   ],
   imports: [
     BrowserModule,
@@ -60,7 +64,8 @@ import { AuthInterceptor } from './auth/auth-interceptor';
     MatExpansionModule,
     HttpClientModule,
     MatProgressSpinnerModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatDialogModule
   ],
   //add Interceptors here in the providers array as an object. 
   //provide: is needed to tell Angular that 
@@ -69,8 +74,19 @@ import { AuthInterceptor } from './auth/auth-interceptor';
       provide: HTTP_INTERCEPTORS, //provide a token HTTP_INTERCEPTORS which is an identifier by the http package which Angular will look for, the Http client, for this token/identifier we want to provide a new value
       useClass: AuthInterceptor, //useClass is what we want to use instead as the token/identifier for the Http Client. so set the interceptor to where the interceptor is located. 
       multi: true//multi set to true means that if there are other default interceptors, do not eliminate them from the app, just add this one we added to the list of interceptors
+    },
+    {
+      provide: HTTP_INTERCEPTORS, //provide a token HTTP_INTERCEPTORS which is an identifier by the http package which Angular will look for, the Http client, for this token/identifier we want to provide a new value
+      useClass: ErrorInterceptor, //useClass is what we want to use instead as the token/identifier for the Http Client. so set the interceptor to where the interceptor is located. 
+      multi: true//multi set to true means that if there are other default interceptors, do not eliminate them from the app, just add this one we added to the list of interceptors
     }
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  //since we load this errorComponent neither through a selector nor through routing, we have to tell angular that it needs
+  //to be prepared to eventually create this component. components normally detect it needs to be prepared by somehwere using the 
+  //selector which initializes a component or that we use it as a component in the router, but since we create this component
+  //dynamically or let that dialog service create it dynamically, we need to tell angular this is going to happen, otherwise we
+  //would get error
+  entryComponents: [ErrorComponent]//this simply tells angular this component is going to get used even though angular can't see it
 })
 export class AppModule { }

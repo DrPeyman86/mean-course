@@ -109,6 +109,11 @@ export class PostListComponent implements OnInit, OnDestroy {
     this.postsService.deletePost(postId).subscribe(()=>{
       //V2 this is in tangent with changes made in postsService.ts. When the subscription was removed from there, need to subscribe to the return http request here.
       this.postsService.getPosts(this.postsPerPage, this.currentPage);
+    //V5 V5 V5 -- error handling
+    //the second argument informs the subscription of any errors that were caught from the service,
+    //so that you can undo some stuff if need be. for example removing the spinner from the screen if error occurred
+    }, () => {
+      this.isLoading = false;
     });
   }
 

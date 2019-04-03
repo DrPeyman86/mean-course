@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
         req.userData = { email: decodedToken.email, userId: decodedToken.userId }//we know email and userId because in user.js when we did jwt.sign() we added these two properties
         next()//call next to continue with the route and add a req property to continue on.
     } catch(e) {
-        res.status(401).json({ message: "Token not verified"});
+        res.status(401).json({ message: "Not authenticated. Token not verified"});
     }
 
 }

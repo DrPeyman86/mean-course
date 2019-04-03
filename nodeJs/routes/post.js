@@ -77,7 +77,11 @@ router.post("",
             }
         });//you don't need to send back the .json() data but you can
     })//the save() is provided by mongoose for all models provided. mongoose will automatically write the insert query to write to the database
-
+    .catch(error=>{
+        res.status(500).json({
+            message: 'Creating a post failed'
+        })
+    })
 });
 //app.get();
 //app.put();
@@ -128,6 +132,11 @@ router.put('/:id',
             }
 
     })
+    .catch(error=>{
+        res.status(500).json({
+            message: 'Could not update post. Technical error'
+        })
+    })
 })
 
 //when this path is called in client side, this code will run
@@ -176,6 +185,11 @@ router.get('', (req, res, next)=>{
             maxPosts: count
         });
     })
+    .catch(error=>{
+        res.status(500).json({
+            message: 'Could not fetch posts. Technical error'
+        })
+    })
     // Posts.findAll().then((posts)=>{
     //   res.status(200).json({
     //     message: "Posts fetched success",
@@ -201,6 +215,11 @@ router.get('/:id',(req,res,next)=>{
         res.status(404).json({message: 'Post not found'})
         }
     })
+    .catch(error=>{
+        res.status(500).json({
+            message: 'Fetching post failed. Technical error'
+        })
+    })
 })
 
 router.delete(`/:id`,checkAuth,(req,res,next)=>{
@@ -219,7 +238,12 @@ router.delete(`/:id`,checkAuth,(req,res,next)=>{
             message: 'User does not have access to delete this post'
           })
         }
-    });//delete the id that matches the _id in the table
+    })//delete the id that matches the _id in the table
+    .catch(error=>{
+        res.status(500).json({
+            message: 'Delete post failed. Technical error'
+        })
+    });
 
 })
 
