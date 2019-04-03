@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     //throw new Error("Method not implemented.");
     const isAuth = this.authService.getIsAuth();//call the getIsAuth method to see if current user is authenticated.
     if (!isAuth) {
-      this.router.navigate(['./login']);//if not authenticated, any requests to page they make, send them back to the login page to have them login again
+      this.router.navigate(['/auth/login']);//if not authenticated, any requests to page they make, send them back to the login page to have them login again
     }
     return isAuth;//return the boolean of whether user is authenticated or not
   }

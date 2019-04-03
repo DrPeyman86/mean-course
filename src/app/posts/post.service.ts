@@ -13,6 +13,10 @@ import { HttpClient } from '@angular/common/http';//import the httpclient to com
 import { stringify } from '@angular/core/src/render3/util';
 import { Router } from '@angular/router';//router provides tool to the service so that when certain methods are finisehd, you can re-route the page to different pages
 
+import { environment } from '../../environments/environment';//environment variables are global variables that can be used throughout the app. So the URL for the server or when you are working locally.
+
+const BACKEND_URL = environment.apiURL + '/posts/';
+
 //service is a typescript class
 //service is a class which you can inject into different components. the service is able to centralize some tasks and provide easy access
 //to the data the service is meant to keep so that the data can be fetched from diferent components without property and event binding
@@ -77,7 +81,7 @@ export class PostsService {
     const queryParams = `?pagesize=${postPerPage}&currentPage=${currentPage}`;
     this.http
       .get<{message: string, posts: any, maxPosts: number}>(//post type is no longer Post[] because posts coming from backend is with an "underscore" in front of id...so change to any for now.
-        'http://localhost:3000/api/posts' + queryParams
+        BACKEND_URL + queryParams
         )
       //.pipe a method that accepts certain observable operators where you can manipuate the data coming in from the http request before the data is handled in the subscription
        //map is an observable operator method expects an object/argument that is the object that comes back from the observables stream. so in .get() request, it expects that returned result
@@ -104,7 +108,7 @@ export class PostsService {
         //can see the new object that comes back which has creator UserId in it
         //console.log(transformedPostData);
         this.posts = transformedPostData.posts;//set this.posts to whatever is coming in from the backend code
-        //V4 V4 V4 -- after adding the creator property to the Post[] model, the creator will be available on page where the Post[] is rendered. so you can use it. 
+        //V4 V4 V4 -- after adding the creator property to the Post[] model, the creator will be available on page where the Post[] is rendered. so you can use it.
         this.postsUpdated.next({
             posts: [...this.posts],
             postCount: transformedPostData.maxPosts
@@ -128,7 +132,7 @@ export class PostsService {
     //add the imagePath because you expect it returned as the backend
     //V4 v4 v4 --authorization - add the creator property to the object to send back when fetching posts
     return this.http.get<{_id: string, title: string, content: string, imagePath: string, creator: string}>(
-      'http://localhost:3000/api/posts/' + id
+      BACKEND_URL + id
       );
 
   }
@@ -149,7 +153,7 @@ export class PostsService {
     //of string type.
     //for the .post() method, you pass a second argument of what you want to post to that path URL
     //the generic types are what you expect from the backend and of what type they are
-    this.http.post<{message: string, post: Post}>('http://localhost:3000/api/posts', postData)//changed from "post" after adding "File" feature
+    this.http.post<{message: string, post: Post}>(BACKEND_URL, postData)//changed from "post" after adding "File" feature
       .subscribe((responseData)=>{
         //console.log(responseData.message);
         //if you have these lines inside the .subscribe() it will only add the newly post if and only if the post was added to the server
@@ -205,10 +209,10 @@ export class PostsService {
     } else {
       //V4 V4 V4 -- authorization -- after adding the creator here since it's needed because we added to the Post[] model, do not set the creator to whatever the creator UserId is from the client
       //because that would open up security issue where a hacker could set the creator userId to whatever and send that back along with the update request, which the backend will successfully apply.
-      //rather verify the creator in the backend 
+      //rather verify the creator in the backend
       postData = { id: id, title: title, content: content, imagePath: image, creator: null };
     }
-    this.http.put<{message: string, postId: string}>('http://localhost:3000/api/posts/' + id, postData)//send the id along with the URL. 2nd argument is the payload you are sending to backend
+    this.http.put<{message: string, postId: string}>(BACKEND_URL + id, postData)//send the id along with the URL. 2nd argument is the payload you are sending to backend
       .subscribe((response)=>{
         //console.log(response);
         //without refreshing the page, want to be able to update the front-end with the newly updated post data
@@ -247,7 +251,7 @@ export class PostsService {
     //just need the this.router.navigate() since that will re-rouse to main page where ngOnInit() will call .getPosts() and refresh data anyway.
     //For delete is different since we do need to re-fetch the list of items after something is deleted.
     //But rather than .subscribing here, simply return the http request back to the component where this method was called and subscribe to it there.
-    return this.http.delete("http://localhost:3000/api/posts/" + postId)//simply return this http call and subscribe to it where it was called rather than subscribing to it here
+    return this.http.delete(BACKEND_URL + postId)//simply return this http call and subscribe to it where it was called rather than subscribing to it here
 
       /*.subscribe(()=>{
         console.log('deleted');

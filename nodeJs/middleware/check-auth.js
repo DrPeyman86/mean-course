@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
         //v4 v4 v4 -- adding authorization to the app.
         //jwt.verify() can also verify and retrieve the decoded token based on the encrypted token along with the salt. we need that sent back as the UserId who created the post to send back to the client
         //to limit who can delete/edit posts. change above line to this.
-        const decodedToken = jwt.verify(token, 'peymancssh')//jwt.verify() will also throw an error so it will go into the catch block if it did not verify
+        const decodedToken = jwt.verify(token, process.env.JWT_KEY)//jwt.verify() will also throw an error so it will go into the catch block if it did not verify
         //expressjs allows middlewares to manipulate a req body or add to it. so any route that is using this middleware, will have a new req property added here. or if you name a property that exists, it will override it.
         req.userData = { email: decodedToken.email, userId: decodedToken.userId }//we know email and userId because in user.js when we did jwt.sign() we added these two properties
         next()//call next to continue with the route and add a req property to continue on.

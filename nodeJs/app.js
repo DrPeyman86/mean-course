@@ -19,7 +19,8 @@ const app = express();//create a new instance of app. the app can now be used af
 //the node-angular is the database you want this app to write to
 //mongodb+srv://peyman:<password>@cluster1-lb4pq.mongodb.net/test?retryWrites=true
 //peyman:UP5HYhHj42q6bDNt
-mongoose.connect("mongodb+srv://peyman:UP5HYhHj42q6bDNt@cluster1-lb4pq.mongodb.net/node-angular?retryWrites=true", {useNewUrlParser: true})
+//V6 v6 v6 -- process.env is special object that holds global variables. the global variables are stored in nodemon.json file.
+mongoose.connect("mongodb+srv://peyman:"+ process.env.MONGO_ATLAS_PW +"@cluster1-lb4pq.mongodb.net/node-angular?retryWrites=true", {useNewUrlParser: true})
 .then(()=>{
   console.log('Connected to database')
 })
@@ -48,7 +49,7 @@ app.use((req,res,next)=>{
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");//define what methods can be sent to the backend app. OPTIONS is important because by default it sends OPTIONS method along with any other
   //method, but if you explicity define which methods can be sent like GET, POST... and then not include "OPTIONS" the app will break.
   next();//should be able to continue
-}) 
+})
 
 //once you have router in app, just do this and the app will relay the routes to that file
 //.use() first argument will filter what URL you are calling and only send routes with the URL beginning

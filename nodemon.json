@@ -1,0 +1,6 @@
+{
+  "env": {
+    "MONGO_ATLAS_PW": "UP5HYhHj42q6bDNt",
+    "JWT_KEY": "peymancssh"
+  }
+}

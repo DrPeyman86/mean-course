@@ -5,6 +5,11 @@ import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { routerNgProbeToken } from '@angular/router/src/router_module';
 
+import { environment } from '../../environments/environment';//environment variables are global variables that can be used throughout the app. So the URL for the server or when you are working locally.
+
+const BACKEND_URL = environment.apiURL + '/user/';
+
+//V6 V6 V6 -- optimziation -- you should not moved services out of root levels because you could have seperate instances of a service. You only want to condense modules into their own files, not services.
 @Injectable({ providedIn: "root"})
 
 export class AuthService {
@@ -37,17 +42,17 @@ export class AuthService {
   //method to create a user from sign up
   createUser(email: string, password: string) {
     const authData: AuthData = {email: email, password: password};
-    //V5 V5 V5 -- error handling -- if the user enters a username already taken you want to handle that error. 
+    //V5 V5 V5 -- error handling -- if the user enters a username already taken you want to handle that error.
     //1. you could return the entire http.post() back to where this method was being called from and subscribing to it there rather than here. however that will not be ideal because
-    //the redirecting occurs in this service and not in the signup.component.ts. 
+    //the redirecting occurs in this service and not in the signup.component.ts.
     //return this.http.post("http://localhost:3000/api/user/signup", authData)//<<<< this would be how you would return the result of the http request back to the component that is was called.
 
-    this.http.post("http://localhost:3000/api/user/signup", authData)
+    this.http.post(BACKEND_URL + "/signup", authData)
       .subscribe((response: any)=>{
         this.router.navigate(['/'])
         //console.log(response);
       }, (error)=> {
-        //V5 v5 v5 -- error handling -- if the user was not authenticated when creating a user, meaning the username was taken, it would go into the 
+        //V5 v5 v5 -- error handling -- if the user was not authenticated when creating a user, meaning the username was taken, it would go into the
         //error handling. there we can just set the subject to false, so that any part of the app that is listening to the authStatusListener subjct will know of this. component like signup.component.ts and login.compoenent.ts
         this.authStatusListener.next(false);
       });
@@ -57,7 +62,7 @@ export class AuthService {
   login(email: string, password: string) {
     const authData: AuthData = {email: email, password: password};
     //token will be received from the post() request, so add the generic type <{token: string}> to let angular know what is expected
-    this.http.post<{token: string, expiresIn: number, userId: string}>("http://localhost:3000/api/user/login", authData)
+    this.http.post<{token: string, expiresIn: number, userId: string}>(BACKEND_URL + "/login", authData)
     //V5 v5 v5 -- error handling. one method of fixing the reroute issue is to use the "tab operator"??? which executes before the .subscribe() sort of like a middleware
       .subscribe((response: any)=> {
         //console.log(response);
