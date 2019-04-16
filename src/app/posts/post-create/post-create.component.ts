@@ -29,7 +29,7 @@ export class PostCreateComponent implements OnInit, OnDestroy {
   private title: string;
   private content: string;
   public post: Post;
-  private isLoading = false;
+  public isLoading = false;
   form: FormGroup; //need to now define the form programmatically. Need to store it in form of type FormGroup. FormGroup is a top level of Form. 
   imagePreview: string;
   private authStatusListener: Subscription;

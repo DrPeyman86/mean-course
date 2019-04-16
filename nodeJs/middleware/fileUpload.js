@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
       if(isValid){
           error = null;
       }
-      callback(error, "nodeJs/images");
+      callback(error, "images");
   },
   filename: (req, file, callback)=>{
       const name = file.originalname.toLowerCase().split(' ').join('_');//originalname is a default property of what multer provides. and also .split(' ').join('_') to remove whitespace and replace with dash

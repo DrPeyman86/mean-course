@@ -24,8 +24,8 @@ mongoose.connect("mongodb+srv://peyman:"+ process.env.MONGO_ATLAS_PW +"@cluster1
 .then(()=>{
   console.log('Connected to database')
 })
-.catch(()=>{
-  console.log('Connection failed');
+.catch((e)=>{
+  console.log('Connection failed', e);
 });
 
 app.use(bodyParser.json());//use body-parser for all incoming requests parsing out json data
@@ -33,7 +33,12 @@ app.use(bodyParser.urlencoded({extended: false}))//if you also want to parse url
 //by default when you want to request a file from a folder stored in the backend will not be allowed. To allow a certain folder to be allowed to fetched from
 //client side, use this middleware
 //path just forwards this route from "/images" to "backened/images" since the client side would not know the exact path of backened code.
-app.use("/images", express.static(path.join("nodeJs/images")));//if client is requesting a URL of the "/images" path, static() middlware allows this to be fetched.
+app.use("/images", express.static(path.join(__dirname,"images")));//if client is requesting a URL of the "/images" path, static() middlware allows this to be fetched.
+
+//v7 v7 v7 -- deployment using the integreated approach where the bakend and front-end are in same directory. 
+//you want routes to point to the static angular directory that has been created within the root directory of the project. within that directory, 
+//index.html will always be rendered if the path of the app does not point to anywhere where it is being handled. 
+app.use("/", express.static(path.join(__dirname, "angular")))
 
 // app.use((req, res, next)=>{
 //   console.log('First middleware');
@@ -56,7 +61,13 @@ app.use((req,res,next)=>{
 //with whatever is in first argument to that routes object defined in 2nd argument
 app.use("/api/posts", postsRoutes);
 app.use("/api/user", userRoutes);//any path that starts with /api/user will get re-routed to the userRoutes file
-
+//v7 v7 v7 -- deployment using the integreated approach where the bakend and front-end are in same directory. 
+//if no route was defined, it would enter the following 
+//You need to set up a route in your nodeJs app.js file so that if a user enters a link not recognized by those routes, it will still render something. 
+//The something would be index.html. so if a user enters /auth/login route, since it’s not handled in backend, it would just render the index.html page instead. 
+app.use((req,res,next)=>{
+  res.sendFile(path.join(__dirname, "angular", "index.html"))
+})
 
 //replaced all routes below with routes/posts.js router method
 
