@@ -114,7 +114,7 @@ export class AuthService {
     //const isInFuture = authInformation.expirationDate > now;//if the authInformation.expirationDate is in the future, we know the user is still authenticated.
     //since this.setAuthTimer() expects a duration to know how long until the token expires in, we have to determine the difference of time between now until the expirationDate.
 
-    //console.log(authInformation);
+    //console.log(authInformation); 
     if(!authInformation){
       return; //if the authInformation does not exist, just return so it will not execute the below lines since they will error out.
     }

@@ -20,7 +20,8 @@ const app = express();//create a new instance of app. the app can now be used af
 //mongodb+srv://peyman:<password>@cluster1-lb4pq.mongodb.net/test?retryWrites=true
 //peyman:UP5HYhHj42q6bDNt
 //V6 v6 v6 -- process.env is special object that holds global variables. the global variables are stored in nodemon.json file.
-mongoose.connect("mongodb+srv://peyman:"+ process.env.MONGO_ATLAS_PW +"@cluster1-lb4pq.mongodb.net/node-angular?retryWrites=true", {useNewUrlParser: true})
+//'mongodb+srv://peyman:<password>@cluster1-lb4pq.mongodb.net/test?retryWrites=true&w=majority'
+mongoose.connect("mongodb+srv://peyman:"+ process.env.MONGO_ATLAS_PW +"@cluster1-lb4pq.mongodb.net/test?retryWrites=true&w=majority", {useNewUrlParser: true})
 .then(()=>{
   console.log('Connected to database')
 })
